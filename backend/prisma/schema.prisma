@@ -1,0 +1,88 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//Enums
+
+enum Role{
+  USER 
+  ADMIN
+}
+
+enum Status{
+  watching
+  completed
+  plan_to_watch
+  dropped
+}
+
+enum Mood{
+  happy
+  sad
+  romantic
+  chill
+  excited
+  nerdy
+  mad
+  stressed
+  bored
+  lonely
+  energetic
+  tragic
+  tense
+}
+
+enum Time_Commit {
+  around_30_min       
+  between_1_and_3_hours
+  binge
+}
+
+model User{
+  id String @id @default(uuid())
+  name String
+  email String @unique
+  password String
+  role Role @default(USER)
+  profileImage String?
+  createdAt DateTime @default(now())
+  userShows UserShow[]
+}
+
+model Show{
+  id String @id @default(uuid())
+  external_id String @unique
+  title String
+  description String?
+  mediaType String
+  imageUrl String?
+  duration Int?
+  releaseDate String?
+  totalEpisodes Int?
+  userShows UserShow[]
+
+  @@unique([external_id, mediaType])
+}
+
+model UserShow{
+  id String @id @default(uuid())
+  user_id String
+  show_id String
+  time_commit Time_Commit?
+  status Status?
+  rating Int?
+  mood Mood[]
+  createdAt DateTime @default(now())
+
+  user User @relation(fields:[user_id], references: [id])
+  show Show @relation(fields:[show_id], references: [id])
+
+  @@unique([user_id,show_id])
+}
+
