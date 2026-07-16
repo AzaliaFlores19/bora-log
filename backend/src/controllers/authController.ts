@@ -1,8 +1,9 @@
 import {Request, Response} from "express";
-import bycrypt from "bcryptjs";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import prisma from "../lib/prisma.js";
-import { AuthRequest } from "../middleware/authMiddleware.js";
+import crypto, { createHash, randomBytes } from "crypto";
+import { sendResetEmail } from "../lib/email.js";
 
 const generateToken = (id: string, role: string)=>{
     return jwt.sign( {id, role},
@@ -11,206 +12,173 @@ const generateToken = (id: string, role: string)=>{
     )
 }
 
+/**
+ * @openapi
+ * /api/auth/register:
+ *   post:
+ *     summary: Register a new user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name: { type: string }
+ *               email: { type: string }
+ *               password: { type: string }
+ *     responses:
+ *       201: { description: "User created" }
+ *       500: { description: "Internal server error" }
+ */
 export const register = async (req: Request, res: Response)=>{
     try{
         const {name, email, password} = req.body;
-
         const userExistant = await prisma.user.findUnique({where: {email}});
-        
-        if(userExistant){
-            return res.status(400).json({message: "User already exists"});
-        }
+        if(userExistant) return res.status(400).json({message: "User already exists"});
 
-        const salt = await bycrypt.genSalt(10);
-        const hashedPassword = await bycrypt.hash(password, salt);
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
         const user = await prisma.user.create({
-            data: {
-                name,
-                email,
-                password: hashedPassword,
-            }
+            data: { name, email, password: hashedPassword }
         });
 
         const token = generateToken(user.id, user.role);
-        res.status(201).json({message : "User created successfully", 
-             user: {
-                id: user.id,
-                name: user.name,
-                email: user.email
-             },
-             token
-        });
-        
+        res.status(201).json({message : "User created", user: {id: user.id, name: user.name, email: user.email}, token});
     } catch (error) {
         res.status(500).json({message: "Error creating user"});
     }
 }
 
+/**
+ * @openapi
+ * /api/auth/login:
+ *   post:
+ *     summary: Login user
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email: { type: string }
+ *               password: { type: string }
+ *     responses:
+ *       200: { description: "Login successful" }
+ *       400: { description: "Invalid credentials" }
+ *       500: { description: "Internal server error" }
+ */
 export const login = async (req: Request, res: Response)=>{
-
     try {
         const {email, password} = req.body;
-
         const user = await prisma.user.findUnique({where: {email}});
+        if(!user || !user.isActive) return res.status(400).json({message: "Invalid credentials or account inactive"});
 
-        if(!user){
-            return res.status(400).json({message: "Invalid credentials"});
-        }
-
-        const matches = await bycrypt.compare(password,user.password);
-
-        if(!matches){
-            return res.status(400).json({message: "Invalid credentials"});      
-        }
+        const matches = await bcrypt.compare(password,user.password);
+        if(!matches) return res.status(400).json({message: "Invalid credentials"});      
 
         const token = generateToken(user.id, user.role);
-
-        res.status(200).json({message: "Login successful",
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email
-            },
-            token
-            
-        });
-
+        res.status(200).json({message: "Login successful", user: {id: user.id, name: user.name, email: user.email}, token});
     }catch (error) {
         res.status(500).json({message: "Error logging in"});
     }
 }
 
-export const updatePassword = async (req: AuthRequest, res: Response) => {
+const hashResetToken = (token: string) => createHash('sha256').update(token).digest('hex');
+
+/**
+ * @openapi
+ * /api/auth/forgot-password:
+ *   post:
+ *     summary: Forgot password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email: { type: string }
+ *     responses:
+ *       200: { description: "Reset email sent" }
+ *       500: { description: "Internal server error" }
+ */
+export const forgotPassword = async (req: Request, res: Response) => {
     try {
-        const targetId = req.params.id || req.user?.id;
-        const { newPassword } = req.body;
-        const currentUser = req.user;
+        const { email } = req.body;
+        const user = await prisma.user.findUnique({ where: { email } });
+        const response = { message: 'Si el correo existe, se enviaran instrucciones para restablecer la contrasena.' };
+        if (!user) return res.status(200).json(response);
 
-        if (currentUser?.role !== "ADMIN" && targetId !== currentUser?.id) {
-            return res.status(403).json({ message: "Acceso denegado. Solo puedes actualizar tu propia contraseña." });
-        }
+        const token = randomBytes(32).toString('hex');
+        const tokenHash = hashResetToken(token);
+        const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
-        if (!targetId) return res.status(401).json({ message: "Usuario no identificado" });
-        if (!newPassword) return res.status(400).json({ message: "La nueva contraseña es requerida" });
-
-        const salt = await bycrypt.genSalt(10);
-        const hashedPassword = await bycrypt.hash(newPassword, salt);
-
-        await prisma.user.update({
-            where: { id: targetId as string },
-            data: { password: hashedPassword }
+        await prisma.passwordResetToken.updateMany({
+            where: { user_id: user.id, used_at: null },
+            data: { used_at: new Date() },
         });
 
-        res.status(200).json({ message: "Contraseña actualizada con éxito" });
-    } catch (error) {
-        res.status(500).json({ message: "Error al actualizar la contraseña" });
-    }
-}
-
-export const updateProfile = async (req: AuthRequest, res: Response)=>{
-    try {
-        const targetId = req.params.id || req.user?.id;
-        const {name, email, profileImage} = req.body;
-        const currentUser = req.user;
-
-        if(currentUser?.role !== "ADMIN" && targetId !== currentUser?.id){
-            return res.status(403).json({message: "Access denied. You can only update your own profile."});
-        }
-
-        const updatedUser = await prisma.user.update({
-            where: {id: targetId as string},
-            data: { name, email, profileImage },
-            select: {  
-                id: true,
-                name: true,
-                email: true,
-                role: true,
-                profileImage: true,
-            }
+        await prisma.passwordResetToken.create({
+            data: { user_id: user.id, token_hash: tokenHash, expires_at: expiresAt }
         });
 
-        res.status(200).json({message: "Profile updated successfully", user: updatedUser});
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+        const resetLink = `${frontendUrl.replace(/\/$/, '')}/reset-password?token=${token}`;
+        await sendResetEmail(email, resetLink);
+
+        res.status(200).json(response);
     } catch (error) {
-        res.status(500).json({message: "Error updating profile"});
+        res.status(500).json({ message: "Error en el proceso de forgot password" });
     }
-}
+};
 
-export const deleteUser = async (req: AuthRequest, res: Response)=>{
+/**
+ * @openapi
+ * /api/auth/reset-password:
+ *   post:
+ *     summary: Reset password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token: { type: string }
+ *               password: { type: string }
+ *     responses:
+ *       200: { description: "Password reset successful" }
+ *       400: { description: "Invalid token" }
+ *       500: { description: "Internal server error" }
+ */
+export const resetPassword = async (req: Request, res: Response) => {
     try {
-        const targetId = req.params.id || req.user?.id;
-        const currentUser = req.user;
+        const { token, password } = req.body;
+        const tokenHash = hashResetToken(token);
 
-        if(currentUser?.role !== "ADMIN" && targetId !== currentUser?.id){
-            return res.status(403).json({message: "Access denied. You can only delete your own account."});
-        }
+        const passwordResetToken = await prisma.passwordResetToken.findFirst({
+            where: { token_hash: tokenHash, used_at: null, expires_at: { gt: new Date() } }
+        });
 
-        if (!targetId) return res.status(401).json({ message: "User not authenticated" });
+        if (!passwordResetToken) return res.status(400).json({ message: 'El token no es valido o ha expirado.' });
 
-        await prisma.user.delete({where: {id: targetId as string}});
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
-        res.status(200).json({message: "User deleted successfully"});
+        await prisma.$transaction([
+            prisma.user.update({ where: { id: passwordResetToken.user_id }, data: { password: hashedPassword } }),
+            prisma.passwordResetToken.update({ where: { id: passwordResetToken.id }, data: { used_at: new Date() } })
+        ]);
+
+        res.status(200).json({ message: 'La contrasena fue actualizada correctamente.' });
     } catch (error) {
-        res.status(500).json({message: "Error deleting user"});     
-
+        res.status(500).json({ message: "Error al restablecer la contraseña" });
     }
-}
-
-export const getUser = async (req: AuthRequest, res: Response)=>{
-    try {
-        const targetId = req.params.id || req.user?.id;
-        const currentUser = req.user;
-
-        if(currentUser?.role !== "ADMIN" && currentUser?.id !== targetId){
-            return res.status(403).json({message: "Access denied. You can only view your own profile."});
-        }
-
-        if (!targetId) return res.status(401).json({ message: "User not authenticated" });
-
-        const user = await prisma.user.findUnique({where: {id: targetId as string},
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
-                profileImage: true,
-                createdAt: true,
-
-                userShows: {
-                    include: {
-                        show: true
-                    },
-                    orderBy: { createdAt: 'desc' }
-                }
-            }
-            });
-
-        if(!user){
-            return res.status(404).json({message: "User not found"});
-        }
-
-        res.status(200).json({user});
-    } catch (error) {
-        res.status(500).json({message: "Error fetching user"});
-    }
-}
-
-export const getAllUsers = async (req: AuthRequest, res: Response)=>{
-    try {
-        const userId = req.user?.id;
-
-        if (!userId) return res.status(401).json({ message: "User not authenticated" });
-        const users = await prisma.user.findMany({
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
-                createdAt: true,
-            }
-        }); 
-        res.status(200).json({users});
-    } catch (error) {
-        res.status(500).json({message: "Error fetching users"});
-    }   
-}
+};
