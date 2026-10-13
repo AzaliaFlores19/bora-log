@@ -1,0 +1,272 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== Theme System =====
+   Each theme defines CSS variables in RGB channel format.
+   Tailwind reads them via rgb(var(--c-*) / <alpha-value>).
+   Default theme is "purple" (Bora-Log brand).
+   Add new themes by adding a [data-theme="name"] block below.
+*/
+
+:root,
+[data-theme="purple"] {
+  --c-bg: 18 16 24;
+  --c-surface: 28 25 38;
+  --c-surface-hover: 38 34 52;
+  --c-border: 48 43 65;
+  --c-primary: 168 85 247;
+  --c-primary-hover: 192 132 252;
+  --c-primary-soft: 168 85 247;
+  --c-primary-fg: 255 255 255;
+  --c-accent: 236 72 153;
+  --c-accent-soft: 236 72 153;
+  --c-text: 245 240 255;
+  --c-text-muted: 180 170 200;
+  --c-text-subtle: 130 120 150;
+  --c-success: 52 211 153;
+  --c-warning: 251 191 36;
+  --c-error: 248 113 113;
+}
+
+[data-theme="ocean"] {
+  --c-bg: 12 20 30;
+  --c-surface: 20 32 46;
+  --c-surface-hover: 30 46 64;
+  --c-border: 40 58 80;
+  --c-primary: 56 189 248;
+  --c-primary-hover: 125 211 252;
+  --c-primary-soft: 56 189 248;
+  --c-primary-fg: 255 255 255;
+  --c-accent: 20 184 166;
+  --c-accent-soft: 20 184 166;
+  --c-text: 240 248 255;
+  --c-text-muted: 160 190 210;
+  --c-text-subtle: 110 135 155;
+  --c-success: 52 211 153;
+  --c-warning: 251 191 36;
+  --c-error: 248 113 113;
+}
+
+[data-theme="forest"] {
+  --c-bg: 14 22 18;
+  --c-surface: 22 34 28;
+  --c-surface-hover: 32 48 40;
+  --c-border: 42 62 50;
+  --c-primary: 74 222 128;
+  --c-primary-hover: 134 239 172;
+  --c-primary-soft: 74 222 128;
+  --c-primary-fg: 18 22 18;
+  --c-accent: 250 204 21;
+  --c-accent-soft: 250 204 21;
+  --c-text: 240 255 245;
+  --c-text-muted: 170 200 180;
+  --c-text-subtle: 110 140 120;
+  --c-success: 52 211 153;
+  --c-warning: 251 191 36;
+  --c-error: 248 113 113;
+}
+
+[data-theme="sunset"] {
+  --c-bg: 25 15 20;
+  --c-surface: 38 24 30;
+  --c-surface-hover: 52 34 42;
+  --c-border: 65 42 50;
+  --c-primary: 251 146 60;
+  --c-primary-hover: 253 186 116;
+  --c-primary-soft: 251 146 60;
+  --c-primary-fg: 255 255 255;
+  --c-accent: 244 114 182;
+  --c-accent-soft: 244 114 182;
+  --c-text: 255 245 240;
+  --c-text-muted: 210 180 170;
+  --c-text-subtle: 155 125 115;
+  --c-success: 52 211 153;
+  --c-warning: 251 191 36;
+  --c-error: 248 113 113;
+}
+
+[data-theme="rose"] {
+  --c-bg: 22 16 20;
+  --c-surface: 34 24 30;
+  --c-surface-hover: 48 34 42;
+  --c-border: 58 42 50;
+  --c-primary: 244 63 94;
+  --c-primary-hover: 253 104 145;
+  --c-primary-soft: 244 63 94;
+  --c-primary-fg: 255 255 255;
+  --c-accent: 251 191 36;
+  --c-accent-soft: 251 191 36;
+  --c-text: 255 240 245;
+  --c-text-muted: 210 175 190;
+  --c-text-subtle: 155 120 135;
+  --c-success: 52 211 153;
+  --c-warning: 251 191 36;
+  --c-error: 248 113 113;
+}
+
+[data-theme="mono"] {
+  --c-bg: 20 20 22;
+  --c-surface: 30 30 33;
+  --c-surface-hover: 42 42 46;
+  --c-border: 52 52 58;
+  --c-primary: 229 231 235;
+  --c-primary-hover: 255 255 255;
+  --c-primary-soft: 168 168 175;
+  --c-primary-fg: 20 20 22;
+  --c-accent: 250 204 21;
+  --c-accent-soft: 250 204 21;
+  --c-text: 240 240 245;
+  --c-text-muted: 170 170 180;
+  --c-text-subtle: 120 120 130;
+  --c-success: 52 211 153;
+  --c-warning: 251 191 36;
+  --c-error: 248 113 113;
+}
+
+/* ===== Base ===== */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-bg text-text font-sans antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  ::selection {
+    background: rgb(var(--c-primary) / 0.3);
+    color: rgb(var(--c-text));
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgb(var(--c-bg));
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--c-border));
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--c-text-subtle));
+  }
+}
+
+/* ===== Components ===== */
+@layer components {
+  .glass {
+    background: rgb(var(--c-surface) / 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .glass-strong {
+    background: rgb(var(--c-surface) / 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, rgb(var(--c-primary)), rgb(var(--c-accent)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .gradient-primary {
+    background: linear-gradient(135deg, rgb(var(--c-primary)), rgb(var(--c-accent)));
+  }
+
+  .gradient-primary-soft {
+    background: linear-gradient(135deg, rgb(var(--c-primary) / 0.15), rgb(var(--c-accent) / 0.1));
+  }
+
+  .ring-primary {
+    box-shadow: 0 0 0 2px rgb(var(--c-primary) / 0.4);
+  }
+
+  .shimmer-bg {
+    background: linear-gradient(
+      90deg,
+      rgb(var(--c-surface)) 0%,
+      rgb(var(--c-surface-hover)) 50%,
+      rgb(var(--c-surface)) 100%
+    );
+    background-size: 1000px 100%;
+  }
+
+  .card-hover {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgb(var(--c-primary) / 0.15);
+    border-color: rgb(var(--c-primary) / 0.4);
+  }
+
+  .ticket-perforation {
+    background-image: radial-gradient(circle, rgb(var(--c-bg)) 4px, transparent 4.5px);
+    background-size: 16px 100%;
+    background-repeat: repeat-x;
+    background-position: center;
+  }
+
+  .film-strip-edge {
+    background-image: linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 6px,
+      rgb(var(--c-text-subtle) / 0.25) 6px,
+      rgb(var(--c-text-subtle) / 0.25) 10px,
+      transparent 10px,
+      transparent 16px
+    );
+    background-size: 100% 16px;
+  }
+
+  .auth-input-wrap {
+    position: relative;
+  }
+  .auth-input-wrap input {
+    background: rgb(var(--c-bg) / 0.4);
+    border: 1px solid rgb(var(--c-border));
+    border-left: 3px solid rgb(var(--c-border));
+    transition: all 0.25s ease;
+  }
+  .auth-input-wrap input:focus {
+    border-left-color: rgb(var(--c-primary));
+    background: rgb(var(--c-bg) / 0.6);
+  }
+  .auth-input-wrap input:focus + .auth-input-glow {
+    opacity: 1;
+  }
+  .auth-input-glow {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: 0 0 24px rgb(var(--c-primary) / 0.15);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+  }
+}
+
+/* ===== Utilities ===== */
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
