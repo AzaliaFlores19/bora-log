@@ -12,7 +12,7 @@ interface AuthContextValue {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, username: string) => Promise<void>;
   signOut: () => Promise<void>;
-  updateProfile: (updates: { username?: string; avatar_color?: string | null }) => Promise<void>;
+  updateProfile: (updates: { username?: string; email?: string; avatar_color?: string | null }) => Promise<void>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
 }
 
@@ -60,10 +60,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateProfile = useCallback(
-    async (updates: { username?: string; avatar_color?: string | null }) => {
+    async (updates: { username?: string; email?: string; avatar_color?: string | null }) => {
       if (!user) return;
       const updated = await userService.updateProfile(user.id, {
         name: updates.username,
+        email: updates.email,
         avatarColor: updates.avatar_color,
       });
       setUser(updated);

@@ -12,7 +12,6 @@ import {
   Eye,
   EyeOff,
   Check,
-  Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
@@ -422,12 +421,6 @@ export function AuthPage({ initialMode = "login" }: AuthPageProps) {
               </div>
             </section>
           </div>
-        </div>
-
-        {/* Demo hint */}
-        <div className="mt-3 sm:mt-4 flex items-center justify-center gap-2 text-[11px] text-text-subtle">
-          <Sparkles className="w-3.5 h-3.5 text-primary/70" />
-          Demo: emails starting with <span className="font-mono text-text-muted">admin</span> get admin access
         </div>
       </div>
     </main>

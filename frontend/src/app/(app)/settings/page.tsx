@@ -21,6 +21,7 @@ export default function SettingsPage() {
 
   // Profile state
   const [username, setUsername] = useState(user?.username ?? "");
+  const [email, setEmail] = useState(user?.email ?? "");
   const [avatarColor, setAvatarColor] = useState(user?.avatar_color ?? DEFAULT_AVATAR_COLOR);
   const [savingProfile, setSavingProfile] = useState(false);
 
@@ -35,10 +36,10 @@ export default function SettingsPage() {
     e.preventDefault();
     setSavingProfile(true);
     try {
-      await updateProfile({ username, avatar_color: avatarColor });
+      await updateProfile({ username, email, avatar_color: avatarColor });
       addToast("success", "Profile updated successfully");
-    } catch {
-      addToast("error", "Failed to update profile");
+    } catch (err) {
+      addToast("error", err instanceof Error ? err.message : "Failed to update profile");
     } finally {
       setSavingProfile(false);
     }
@@ -153,9 +154,14 @@ export default function SettingsPage() {
             </div>
             <div className="relative">
               <Mail className="absolute left-3.5 top-9 w-4 h-4 text-text-subtle pointer-events-none" />
-              <Input label="Email" type="email" value={user?.email ?? ""} disabled className="pl-11" />
+              <Input
+                label="Email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="pl-11"
+              />
             </div>
-            <p className="text-xs text-text-subtle">Email cannot be changed in demo mode</p>
 
             <div className="flex justify-end pt-2">
               <Button type="submit" loading={savingProfile}>
