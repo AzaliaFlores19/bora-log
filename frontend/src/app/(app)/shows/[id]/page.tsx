@@ -1,10 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Star, Clock, Calendar, Tv, Pencil, Trash2 } from "lucide-react";
-import type { Show } from "@/types";
-import * as showsService from "@/services/shows.service";
 import { useShows } from "@/hooks/useShows";
 import { useToast } from "@/hooks/useToast";
 import { useShowModal } from "@/components/shows/ShowModalProvider";
@@ -12,7 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { getPosterUrl, getBackdropUrl } from "@/lib/mock-data";
+import { posterUrl, backdropUrl } from "@/lib/media";
 import {
   STATUS_LABELS,
   STATUS_DOT_COLORS,
@@ -25,24 +22,14 @@ import { MOOD_ICONS } from "@/lib/mood-icons";
 
 export default function ShowDetailPage() {
   const params = useParams<{ id: string }>();
-  const showId = params.id;
+  const userShowId = params.id;
   const router = useRouter();
-  const { shows, removeShow } = useShows();
+  const { shows, loading, removeShow } = useShows();
   const { addToast } = useToast();
   const { openEditModal } = useShowModal();
 
-  const [show, setShow] = useState<Show | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  const userShow = shows.find((us) => us.show_id === showId) ?? null;
-
-  useEffect(() => {
-    setLoading(true);
-    showsService.fetchShowById(showId).then((s) => {
-      setShow(s);
-      setLoading(false);
-    });
-  }, [showId]);
+  const userShow = shows.find((us) => us.id === userShowId) ?? null;
+  const show = userShow?.show ?? null;
 
   async function handleRemove() {
     if (!userShow) return;
@@ -72,7 +59,7 @@ export default function ShowDetailPage() {
     );
   }
 
-  if (!show) {
+  if (!show || !userShow) {
     return (
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <EmptyState
@@ -101,7 +88,7 @@ export default function ShowDetailPage() {
       {/* Hero backdrop */}
       <div className="relative rounded-3xl overflow-hidden mb-6 h-56 sm:h-72">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={getBackdropUrl(show)} alt="" className="w-full h-full object-cover" />
+        <img src={backdropUrl(show)} alt="" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/70 to-transparent" />
       </div>
 
@@ -111,7 +98,7 @@ export default function ShowDetailPage() {
         <div className="w-36 sm:w-48 flex-shrink-0 mx-auto sm:mx-0">
           <div className="rounded-2xl overflow-hidden bg-bg border-2 border-surface shadow-xl">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={getPosterUrl(show)} alt={show.title} className="w-full h-full object-cover" />
+            <img src={posterUrl(show)} alt={show.title} className="w-full h-full object-cover" />
           </div>
         </div>
 
@@ -137,104 +124,75 @@ export default function ShowDetailPage() {
                 {formatRuntime(show.runtime)}
               </Badge>
             )}
-            {show.vote_average && (
-              <Badge className="border-border bg-bg/50 text-text-subtle">
-                <Star className="w-3 h-3 fill-warning text-warning" />
-                {show.vote_average.toFixed(1)}
-              </Badge>
-            )}
-            {show.number_of_seasons && (
-              <Badge className="border-border bg-bg/50 text-text-subtle">
-                {show.number_of_seasons} season{show.number_of_seasons !== 1 && "s"}
-              </Badge>
-            )}
           </div>
-
-          {/* Genres */}
-          {show.genres.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {show.genres.map((g) => (
-                <Badge key={g} className="border-primary/20 bg-primary/5 text-primary">
-                  {g}
-                </Badge>
-              ))}
-            </div>
-          )}
 
           {/* Overview */}
           {show.overview && <p className="text-text-muted leading-relaxed mb-6 max-w-2xl">{show.overview}</p>}
 
           {/* User's tracking info */}
-          {userShow ? (
-            <div className="rounded-2xl bg-surface border border-border p-5 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-display font-bold text-text">Your Tracking</h3>
-                <div className="flex gap-2">
-                  <Button variant="secondary" size="sm" onClick={() => openEditModal(userShow)}>
-                    <Pencil className="w-3.5 h-3.5" />
-                    Edit
-                  </Button>
-                  <Button variant="danger" size="sm" onClick={handleRemove}>
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
+          <div className="rounded-2xl bg-surface border border-border p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-display font-bold text-text">Your Tracking</h3>
+              <div className="flex gap-2">
+                <Button variant="secondary" size="sm" onClick={() => openEditModal(userShow)}>
+                  <Pencil className="w-3.5 h-3.5" />
+                  Edit
+                </Button>
+                <Button variant="danger" size="sm" onClick={handleRemove}>
+                  <Trash2 className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className={`w-2.5 h-2.5 rounded-full ${STATUS_DOT_COLORS[userShow.status]}`} />
+              <span className="text-sm font-medium text-text">{STATUS_LABELS[userShow.status]}</span>
+            </div>
+
+            {userShow.rating !== null && (
+              <div>
+                <span className="text-xs text-text-subtle uppercase tracking-wide block mb-1.5">Your Rating</span>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: 10 }, (_, i) => (
+                    <Star
+                      key={i}
+                      className={`w-4 h-4 ${i < userShow.rating! ? "fill-warning text-warning" : "text-text-subtle"}`}
+                    />
+                  ))}
+                  <span className="ml-2 text-sm text-text-muted">{userShow.rating}/10</span>
                 </div>
               </div>
+            )}
 
-              <div className="flex items-center gap-3">
-                <span className={`w-2.5 h-2.5 rounded-full ${STATUS_DOT_COLORS[userShow.status]}`} />
-                <span className="text-sm font-medium text-text">{STATUS_LABELS[userShow.status]}</span>
+            {userShow.moods.length > 0 && (
+              <div>
+                <span className="text-xs text-text-subtle uppercase tracking-wide block mb-1.5">Moods</span>
+                <div className="flex flex-wrap gap-2">
+                  {userShow.moods.map((m) => {
+                    const MoodIcon = MOOD_ICONS[m];
+                    return (
+                      <Badge key={m} className="border-primary/20 bg-primary/5 text-primary">
+                        <MoodIcon className="w-3 h-3" />
+                        {MOOD_LABELS[m]}
+                      </Badge>
+                    );
+                  })}
+                </div>
               </div>
+            )}
 
-              {userShow.rating !== null && (
-                <div>
-                  <span className="text-xs text-text-subtle uppercase tracking-wide block mb-1.5">Your Rating</span>
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: 10 }, (_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${i < userShow.rating! ? "fill-warning text-warning" : "text-text-subtle"}`}
-                      />
-                    ))}
-                    <span className="ml-2 text-sm text-text-muted">{userShow.rating}/10</span>
-                  </div>
-                </div>
-              )}
-
-              {userShow.moods.length > 0 && (
-                <div>
-                  <span className="text-xs text-text-subtle uppercase tracking-wide block mb-1.5">Moods</span>
-                  <div className="flex flex-wrap gap-2">
-                    {userShow.moods.map((m) => {
-                      const MoodIcon = MOOD_ICONS[m];
-                      return (
-                        <Badge key={m} className="border-primary/20 bg-primary/5 text-primary">
-                          <MoodIcon className="w-3 h-3" />
-                          {MOOD_LABELS[m]}
-                        </Badge>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {userShow.time_commit && (
-                <div>
-                  <span className="text-xs text-text-subtle uppercase tracking-wide block mb-1.5">
-                    Time Commitment
-                  </span>
-                  <Badge className="border-border bg-bg/50 text-text-muted">
-                    <Clock className="w-3 h-3" />
-                    {TIME_COMMIT_LABELS[userShow.time_commit]}
-                  </Badge>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="rounded-2xl bg-surface border border-border p-5 text-center">
-              <p className="text-text-muted text-sm mb-3">Not in your log yet.</p>
-              <Button onClick={() => router.push("/search")}>Add to Your Log</Button>
-            </div>
-          )}
+            {userShow.time_commit && (
+              <div>
+                <span className="text-xs text-text-subtle uppercase tracking-wide block mb-1.5">
+                  Time Commitment
+                </span>
+                <Badge className="border-border bg-bg/50 text-text-muted">
+                  <Clock className="w-3 h-3" />
+                  {TIME_COMMIT_LABELS[userShow.time_commit]}
+                </Badge>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

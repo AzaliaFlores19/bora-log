@@ -2,7 +2,7 @@
 
 import type { UserShow } from "@/types";
 import { STATUS_LABELS, STATUS_DOT_COLORS } from "@/lib/constants";
-import { getPosterUrl } from "@/lib/mock-data";
+import { posterUrl } from "@/lib/media";
 import { Star, Play, CheckCircle2, Bookmark, XCircle, MoreVertical } from "lucide-react";
 import { MOOD_ICONS } from "@/lib/mood-icons";
 import { useRouter } from "next/navigation";
@@ -49,7 +49,7 @@ export function ShowCard({ userShow, onEdit, onRemove }: ShowCardProps) {
       <div className="relative aspect-[2/3] overflow-hidden bg-bg">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={getPosterUrl(show)}
+          src={posterUrl(show)}
           alt={show.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"

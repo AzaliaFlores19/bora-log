@@ -5,7 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { RatingStars } from "@/components/ui/RatingStars";
 import { Badge } from "@/components/ui/Badge";
-import { getPosterUrl, getBackdropUrl } from "@/lib/mock-data";
+import { posterUrl, backdropUrl } from "@/lib/media";
 import { STATUS_LABELS, TIME_COMMIT_LABELS, MOOD_LABELS, formatDate, formatRuntime } from "@/lib/constants";
 import type { Show, UserShow, ShowStatus, Mood, TimeCommit } from "@/types";
 import { Star, Clock, Calendar, Tv, Check } from "lucide-react";
@@ -71,7 +71,7 @@ export function ShowFormModal({ open, onClose, show, existingEntry, onSubmit }: 
       {/* Hero backdrop */}
       <div className="relative -mx-6 -mt-6 h-40 overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={getBackdropUrl(show)} alt="" className="w-full h-full object-cover" />
+        <img src={backdropUrl(show)} alt="" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/60 to-transparent" />
         <button
           onClick={onClose}
@@ -85,7 +85,7 @@ export function ShowFormModal({ open, onClose, show, existingEntry, onSubmit }: 
       <div className="flex gap-4 -mt-8 relative mb-6">
         <div className="w-24 h-36 rounded-xl overflow-hidden bg-bg border-2 border-surface flex-shrink-0 shadow-xl">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={getPosterUrl(show)} alt={show.title} className="w-full h-full object-cover" />
+          <img src={posterUrl(show)} alt={show.title} className="w-full h-full object-cover" />
         </div>
         <div className="flex-1 pt-8">
           <h2 className="font-display text-xl font-extrabold text-text">{show.title}</h2>

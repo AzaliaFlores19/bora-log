@@ -3,12 +3,12 @@
 import { useState, useEffect, useRef } from "react";
 import { Search as SearchIcon, X, TrendingUp, Star, Tv } from "lucide-react";
 import type { TMDBSearchResult } from "@/types";
-import * as tmdbService from "@/services/tmdb.service";
+import * as showService from "@/services/show.service";
 import { useShows } from "@/hooks/useShows";
 import { useShowModal } from "@/components/shows/ShowModalProvider";
 import { SearchResultCard } from "@/components/search/SearchResultCard";
 import { EmptyState, LoadingState } from "@/components/ui/EmptyState";
-import { getSearchPosterUrl } from "@/lib/mock-data";
+import { searchPosterUrl } from "@/lib/media";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
@@ -23,7 +23,7 @@ export default function SearchPage() {
   const { openAddModal } = useShowModal();
 
   useEffect(() => {
-    tmdbService.fetchTrending().then(setTrending);
+    showService.fetchTrending().then(setTrending).catch(() => setTrending([]));
   }, []);
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export default function SearchPage() {
     setLoading(true);
     debounceRef.current = setTimeout(async () => {
       try {
-        const data = await tmdbService.searchShows(query);
+        const data = await showService.searchShows(query);
         setResults(data);
       } catch {
         setResults([]);
@@ -110,7 +110,7 @@ export default function SearchPage() {
                   <div className="relative aspect-[2/3] overflow-hidden bg-bg">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={getSearchPosterUrl(r)}
+                      src={searchPosterUrl(r)}
                       alt={r.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"

@@ -1,12 +1,11 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
 import type { Show, UserShow, TMDBSearchResult, ShowStatus, Mood, TimeCommit } from "@/types";
-import * as tmdbService from "@/services/tmdb.service";
-import * as showsService from "@/services/shows.service";
+import * as showService from "@/services/show.service";
 import { ShowFormModal } from "@/components/shows/ShowFormModal";
 import { useToast } from "@/hooks/useToast";
+import { useShows } from "@/hooks/useShows";
 
 interface ShowModalContextValue {
   openAddModal: (result: TMDBSearchResult) => void;
@@ -16,7 +15,7 @@ interface ShowModalContextValue {
 const ShowModalContext = createContext<ShowModalContextValue | null>(null);
 
 export function ShowModalProvider({ children }: { children: ReactNode }) {
-  const router = useRouter();
+  const { addShow, updateShow } = useShows();
   const { addToast } = useToast();
   const [open, setOpen] = useState(false);
   const [show, setShow] = useState<Show | null>(null);
@@ -24,14 +23,14 @@ export function ShowModalProvider({ children }: { children: ReactNode }) {
 
   const openAddModal = useCallback(
     async (result: TMDBSearchResult) => {
-      const details = await tmdbService.fetchDetailsById(result.id, result.media_type);
-      if (!details) {
+      try {
+        const details = await showService.fetchExternalDetails(result.id, result.media_type);
+        setShow(details);
+        setEditingEntry(null);
+        setOpen(true);
+      } catch {
         addToast("error", "Could not load show details");
-        return;
       }
-      setShow(details);
-      setEditingEntry(null);
-      setOpen(true);
     },
     [addToast],
   );
@@ -52,22 +51,20 @@ export function ShowModalProvider({ children }: { children: ReactNode }) {
       if (!show) return;
       try {
         if (editingEntry) {
-          await showsService.updateUserShow(editingEntry.id, data);
+          await updateShow(editingEntry.id, data);
           addToast("success", `Updated "${show.title}"`);
         } else {
-          await showsService.addUserShow({ show, ...data });
+          await addShow({ show, ...data });
           addToast("success", `Added "${show.title}" to your log`);
         }
         setOpen(false);
         setEditingEntry(null);
         setShow(null);
-        router.push("/dashboard");
-        router.refresh();
-      } catch {
-        addToast("error", "Something went wrong");
+      } catch (err) {
+        addToast("error", err instanceof Error ? err.message : "Something went wrong");
       }
     },
-    [show, editingEntry, addToast, router],
+    [show, editingEntry, addShow, updateShow, addToast],
   );
 
   const handleClose = useCallback(() => {
