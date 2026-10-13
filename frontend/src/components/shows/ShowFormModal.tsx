@@ -69,9 +69,13 @@ export function ShowFormModal({ open, onClose, show, existingEntry, onSubmit }: 
   return (
     <Modal open={open} onClose={onClose} size="lg">
       {/* Hero backdrop */}
-      <div className="relative -mx-6 -mt-6 h-40 overflow-hidden">
+      <div className="relative -mx-6 -mt-6 h-40 overflow-hidden bg-bg">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={backdropUrl(show)} alt="" className="w-full h-full object-cover" />
+        <img
+          src={backdropUrl(show)}
+          alt=""
+          className={`w-full h-full object-cover ${show.backdrop_path ? "" : "blur-2xl scale-110 opacity-70"}`}
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/60 to-transparent" />
         <button
           onClick={onClose}

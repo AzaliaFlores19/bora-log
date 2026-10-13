@@ -25,6 +25,7 @@ export interface ShowDto {
   description: string | null;
   mediaType: "movie" | "tv";
   imageUrl: string | null;
+  backdropUrl: string | null;
   duration: number | null;
   totalEpisodes: number | null;
   releaseDate: string | null;

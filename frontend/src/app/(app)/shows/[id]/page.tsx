@@ -112,9 +112,13 @@ export default function ShowDetailPage() {
       </button>
 
       {/* Hero backdrop */}
-      <div className="relative rounded-3xl overflow-hidden mb-6 h-56 sm:h-72">
+      <div className="relative rounded-3xl overflow-hidden mb-6 h-56 sm:h-72 bg-bg">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={backdropUrl(show)} alt="" className="w-full h-full object-cover" />
+        <img
+          src={backdropUrl(show)}
+          alt=""
+          className={`w-full h-full object-cover ${show.backdrop_path ? "" : "blur-2xl scale-110 opacity-70"}`}
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/70 to-transparent" />
       </div>
 
