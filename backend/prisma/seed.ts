@@ -47,7 +47,7 @@ const DEMO_SHOWS: DemoShow[] = [
     releaseDate: "2020-05-01T00:00:00.000Z",
     status: "completed",
     rating: 9,
-    mood: ["happy", "excited"],
+    mood: ["happy", "thrilled"],
     time_commit: "between_1_and_3_hours",
   },
   {
@@ -61,7 +61,7 @@ const DEMO_SHOWS: DemoShow[] = [
     releaseDate: "2022-09-15T00:00:00.000Z",
     status: "watching",
     rating: 8,
-    mood: ["chill", "nerdy"],
+    mood: ["cozy", "nerdy"],
     time_commit: "around_30_min",
   },
   {
@@ -75,7 +75,7 @@ const DEMO_SHOWS: DemoShow[] = [
     releaseDate: "2019-02-10T00:00:00.000Z",
     status: "plan_to_watch",
     rating: 7,
-    mood: ["nerdy", "chill"],
+    mood: ["nerdy", "cozy"],
     time_commit: "binge",
   },
 ];
