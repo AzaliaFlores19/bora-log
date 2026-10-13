@@ -1,7 +1,10 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Star, Clock, Calendar, Tv, Pencil, Trash2 } from "lucide-react";
+import type { UserShow } from "@/types";
+import * as showService from "@/services/show.service";
 import { useShows } from "@/hooks/useShows";
 import { useToast } from "@/hooks/useToast";
 import { useShowModal } from "@/components/shows/ShowModalProvider";
@@ -28,8 +31,31 @@ export default function ShowDetailPage() {
   const { addToast } = useToast();
   const { openEditModal } = useShowModal();
 
-  const userShow = shows.find((us) => us.id === userShowId) ?? null;
+  const [fetched, setFetched] = useState<UserShow | null>(null);
+  const [fetching, setFetching] = useState(false);
+
+  const listEntry = shows.find((us) => us.id === userShowId) ?? null;
+  const userShow = listEntry ?? fetched;
   const show = userShow?.show ?? null;
+
+  // Fallback for direct links / reloads where the shared list isn't loaded yet.
+  useEffect(() => {
+    if (loading || listEntry) return;
+    let active = true;
+    setFetching(true);
+    showService
+      .fetchUserShowById(userShowId)
+      .then((entry) => {
+        if (active) setFetched(entry);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (active) setFetching(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [loading, listEntry, userShowId]);
 
   async function handleRemove() {
     if (!userShow) return;
@@ -42,7 +68,7 @@ export default function ShowDetailPage() {
     }
   }
 
-  if (loading) {
+  if (loading || fetching) {
     return (
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Skeleton className="h-8 w-24 mb-6" />

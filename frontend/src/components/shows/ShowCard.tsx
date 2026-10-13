@@ -43,7 +43,7 @@ export function ShowCard({ userShow, onEdit, onRemove }: ShowCardProps) {
   return (
     <div
       className="group relative rounded-2xl bg-surface border border-border overflow-hidden card-hover cursor-pointer"
-      onClick={() => router.push(`/shows/${show.id}`)}
+      onClick={() => router.push(`/shows/${userShow.id}`)}
     >
       {/* Poster */}
       <div className="relative aspect-[2/3] overflow-hidden bg-bg">
