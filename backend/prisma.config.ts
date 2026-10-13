@@ -12,6 +12,7 @@ export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
+    seed: "node --loader ts-node/esm --no-warnings prisma/seed.ts",
   },
   datasource: {
     url: databaseUrl,
