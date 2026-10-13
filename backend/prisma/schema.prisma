@@ -15,8 +15,11 @@ model User {
   profileImage        String?
   role                Role                 @default(USER)
   isActive            Boolean              @default(true)
+  deletedAt           DateTime?
   userShows           UserShow[]
   passwordResetTokens PasswordResetToken[]
+
+  @@index([deletedAt])
 }
 
 model PasswordResetToken {
@@ -26,7 +29,7 @@ model PasswordResetToken {
   expires_at DateTime  @db.Timestamptz(6)
   used_at    DateTime? @db.Timestamptz(6)
   created_at DateTime  @default(now()) @db.Timestamptz(6)
-  user       User      @relation(fields: [user_id], references: [id])
+  user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id])
   @@index([expires_at])
@@ -57,10 +60,12 @@ model UserShow {
   rating      Int?
   mood        Mood[]
   createdAt   DateTime     @default(now())
-  show        Show         @relation(fields: [show_id], references: [id])
-  user        User         @relation(fields: [user_id], references: [id])
+  deletedAt   DateTime?
+  show        Show         @relation(fields: [show_id], references: [id], onDelete: Cascade)
+  user        User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, show_id])
+  @@index([deletedAt])
 }
 
 enum Role {
