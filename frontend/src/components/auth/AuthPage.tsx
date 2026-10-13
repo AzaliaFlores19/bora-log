@@ -17,6 +17,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import { Spinner } from "@/components/ui/Spinner";
+import * as authService from "@/services/auth.service";
 import { MOOD_ICONS } from "@/lib/mood-icons";
 import { MOOD_LABELS } from "@/lib/constants";
 import type { Mood } from "@/types";
@@ -111,10 +112,11 @@ export function AuthPage({ initialMode = "login" }: AuthPageProps) {
     setFieldErrors({});
     setLoading(true);
     try {
-      // Simulated for now; will call the API's forgot-password endpoint later.
-      await new Promise((resolve) => setTimeout(resolve, 700));
+      await authService.forgotPassword(email.trim());
       setSentEmail(email.trim());
       setScreen("sent");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not send the reset link");
     } finally {
       setLoading(false);
     }
