@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { LogOut, Search, LayoutGrid, Tv, Settings, Shield, ChevronDown } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+import { Avatar } from "@/components/ui/Avatar";
 
 export function Navbar() {
   const { user, signOut } = useAuth();
@@ -81,9 +82,7 @@ export function Navbar() {
                   onClick={() => setMenuOpen(!menuOpen)}
                   className="flex items-center gap-2 p-1 rounded-lg hover:bg-surface-hover transition-colors"
                 >
-                  <div className="w-9 h-9 rounded-full gradient-primary-soft border border-primary/20 flex items-center justify-center text-primary font-semibold text-sm">
-                    {user.username.charAt(0).toUpperCase()}
-                  </div>
+                  <Avatar name={user.username} color={user.avatar_color} size={36} />
                   <ChevronDown className={`w-4 h-4 text-text-muted transition-transform ${menuOpen ? "rotate-180" : ""}`} />
                 </button>
 

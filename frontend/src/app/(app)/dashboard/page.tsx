@@ -23,6 +23,7 @@ import { FilterBar } from "@/components/shows/FilterBar";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { Avatar } from "@/components/ui/Avatar";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -139,9 +140,12 @@ export default function DashboardPage() {
         {/* Avatar + info */}
         <div className="flex items-center gap-4 flex-1 min-w-0">
           <div className="relative flex-shrink-0">
-            <div className="w-20 h-20 rounded-full gradient-primary flex items-center justify-center text-primary-fg font-display text-3xl font-extrabold ring-2 ring-border ring-offset-2 ring-offset-bg">
-              {user?.username?.charAt(0).toUpperCase() ?? "?"}
-            </div>
+            <Avatar
+              name={user?.username ?? "?"}
+              color={user?.avatar_color}
+              size={80}
+              className="ring-2 ring-border ring-offset-2 ring-offset-bg"
+            />
             <span className="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-emerald-400 border-2 border-bg" />
           </div>
           <div className="min-w-0">

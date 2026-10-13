@@ -2,11 +2,13 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { User as UserIcon, Lock, Mail, Save, ArrowLeft, Shield, Camera } from "lucide-react";
+import { User as UserIcon, Lock, Mail, Save, ArrowLeft, Shield, Check } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Avatar } from "@/components/ui/Avatar";
+import { AVATAR_COLORS, DEFAULT_AVATAR_COLOR } from "@/lib/avatar-colors";
 
 type Tab = "profile" | "security";
 
@@ -19,7 +21,7 @@ export default function SettingsPage() {
 
   // Profile state
   const [username, setUsername] = useState(user?.username ?? "");
-  const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url ?? "");
+  const [avatarColor, setAvatarColor] = useState(user?.avatar_color ?? DEFAULT_AVATAR_COLOR);
   const [savingProfile, setSavingProfile] = useState(false);
 
   // Password state
@@ -33,7 +35,7 @@ export default function SettingsPage() {
     e.preventDefault();
     setSavingProfile(true);
     try {
-      await updateProfile({ username, avatar_url: avatarUrl || null });
+      await updateProfile({ username, avatar_color: avatarColor });
       addToast("success", "Profile updated successfully");
     } catch {
       addToast("error", "Failed to update profile");
@@ -108,14 +110,7 @@ export default function SettingsPage() {
         <div className="rounded-2xl bg-surface border border-border p-6 animate-scale-in">
           {/* Avatar preview */}
           <div className="flex items-center gap-4 mb-6">
-            <div className="relative">
-              <div className="w-20 h-20 rounded-2xl gradient-primary flex items-center justify-center text-primary-fg font-display text-2xl font-extrabold shadow-lg">
-                {username.charAt(0).toUpperCase() || "?"}
-              </div>
-              <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-surface border border-border flex items-center justify-center">
-                <Camera className="w-3.5 h-3.5 text-text-muted" />
-              </div>
-            </div>
+            <Avatar name={username || "?"} color={avatarColor} size={80} rounded="xl" className="shadow-lg" />
             <div>
               <h2 className="font-display text-lg font-bold text-text">{username || "User"}</h2>
               <p className="text-sm text-text-subtle">{user?.email}</p>
@@ -130,13 +125,32 @@ export default function SettingsPage() {
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Your display name"
             />
-            <Input
-              label="Avatar URL"
-              type="url"
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-              placeholder="https://..."
-            />
+
+            {/* Profile color picker */}
+            <div>
+              <label className="block text-sm font-medium text-text-muted mb-2">Profile color</label>
+              <div className="flex flex-wrap gap-2.5">
+                {AVATAR_COLORS.map((c) => {
+                  const active = avatarColor === c.value;
+                  return (
+                    <button
+                      key={c.value}
+                      type="button"
+                      onClick={() => setAvatarColor(c.value)}
+                      title={c.name}
+                      aria-label={c.name}
+                      className={`relative w-9 h-9 rounded-full transition-transform ${
+                        active ? "ring-2 ring-primary ring-offset-2 ring-offset-surface scale-110" : "hover:scale-110"
+                      }`}
+                      style={{ background: c.value }}
+                    >
+                      {active && <Check className="w-4 h-4 absolute inset-0 m-auto text-white drop-shadow" />}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-text-subtle mt-2">Pick the color of your profile circle.</p>
+            </div>
             <div className="relative">
               <Mail className="absolute left-3.5 top-9 w-4 h-4 text-text-subtle pointer-events-none" />
               <Input label="Email" type="email" value={user?.email ?? ""} disabled className="pl-11" />

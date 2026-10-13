@@ -1,4 +1,5 @@
 import type { Session } from "@/types";
+import { colorFromSeed } from "@/lib/avatar-colors";
 
 // ===== Auth Service =====
 // Local (localStorage) implementation used while the API is not wired yet.
@@ -20,7 +21,7 @@ export async function signUp(email: string, password: string, username: string):
       id: `user-${Date.now()}`,
       email,
       username: username || email.split("@")[0],
-      avatar_url: null,
+      avatar_color: colorFromSeed(email),
       role: "admin",
       created_at: new Date().toISOString(),
     },
@@ -42,7 +43,7 @@ export async function signIn(email: string, _password: string): Promise<Session>
       id: `user-${Date.now()}`,
       email,
       username: email.split("@")[0],
-      avatar_url: null,
+      avatar_color: colorFromSeed(email),
       role: isAdmin ? "admin" : "user",
       created_at: new Date().toISOString(),
     },
@@ -55,7 +56,7 @@ export async function signIn(email: string, _password: string): Promise<Session>
 
 export async function updateProfile(updates: {
   username?: string;
-  avatar_url?: string | null;
+  avatar_color?: string | null;
 }): Promise<Session> {
   await delay(500);
   const session = getSession();

@@ -66,7 +66,7 @@ export interface User {
   id: string;
   email: string;
   username: string;
-  avatar_url: string | null;
+  avatar_color: string | null;
   role: UserRole;
   created_at: string;
 }
@@ -80,7 +80,6 @@ export interface AdminUser {
   id: string;
   email: string;
   username: string;
-  avatar_url: string | null;
   role: UserRole;
   is_active: boolean;
   created_at: string;

@@ -9,13 +9,13 @@ function delay(ms: number): Promise<void> {
 }
 
 const mockAdminUsers: AdminUser[] = [
-  { id: "u1", email: "alice@example.com", username: "alice", avatar_url: null, role: "admin", is_active: true, created_at: new Date(Date.now() - 90 * 86400000).toISOString(), show_count: 47 },
-  { id: "u2", email: "bob@example.com", username: "bob_cinema", avatar_url: null, role: "user", is_active: true, created_at: new Date(Date.now() - 60 * 86400000).toISOString(), show_count: 23 },
-  { id: "u3", email: "carol@example.com", username: "carol_tv", avatar_url: null, role: "user", is_active: true, created_at: new Date(Date.now() - 45 * 86400000).toISOString(), show_count: 89 },
-  { id: "u4", email: "dave@example.com", username: "dave_watcher", avatar_url: null, role: "user", is_active: false, created_at: new Date(Date.now() - 30 * 86400000).toISOString(), show_count: 12 },
-  { id: "u5", email: "eve@example.com", username: "eve_binge", avatar_url: null, role: "user", is_active: true, created_at: new Date(Date.now() - 15 * 86400000).toISOString(), show_count: 156 },
-  { id: "u6", email: "frank@example.com", username: "frank_flix", avatar_url: null, role: "user", is_active: true, created_at: new Date(Date.now() - 7 * 86400000).toISOString(), show_count: 5 },
-  { id: "u7", email: "grace@example.com", username: "grace_shows", avatar_url: null, role: "user", is_active: false, created_at: new Date(Date.now() - 3 * 86400000).toISOString(), show_count: 34 },
+  { id: "u1", email: "alice@example.com", username: "alice", role: "admin", is_active: true, created_at: new Date(Date.now() - 90 * 86400000).toISOString(), show_count: 47 },
+  { id: "u2", email: "bob@example.com", username: "bob_cinema", role: "user", is_active: true, created_at: new Date(Date.now() - 60 * 86400000).toISOString(), show_count: 23 },
+  { id: "u3", email: "carol@example.com", username: "carol_tv", role: "user", is_active: true, created_at: new Date(Date.now() - 45 * 86400000).toISOString(), show_count: 89 },
+  { id: "u4", email: "dave@example.com", username: "dave_watcher", role: "user", is_active: false, created_at: new Date(Date.now() - 30 * 86400000).toISOString(), show_count: 12 },
+  { id: "u5", email: "eve@example.com", username: "eve_binge", role: "user", is_active: true, created_at: new Date(Date.now() - 15 * 86400000).toISOString(), show_count: 156 },
+  { id: "u6", email: "frank@example.com", username: "frank_flix", role: "user", is_active: true, created_at: new Date(Date.now() - 7 * 86400000).toISOString(), show_count: 5 },
+  { id: "u7", email: "grace@example.com", username: "grace_shows", role: "user", is_active: false, created_at: new Date(Date.now() - 3 * 86400000).toISOString(), show_count: 34 },
 ];
 
 export async function fetchAllUsers(): Promise<AdminUser[]> {
