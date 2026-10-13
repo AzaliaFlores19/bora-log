@@ -34,7 +34,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { UserWatchLogDrawer } from "@/components/admin/UserWatchLogDrawer";
 import { EditUserModal } from "@/components/admin/EditUserModal";
 import { posterUrl } from "@/lib/media";
-import { STATUS_DOT_COLORS, STATUS_LABELS, STATUS_COLORS } from "@/lib/constants";
+import { STATUS_DOT_COLORS, STATUS_LABELS } from "@/lib/constants";
 import * as adminService from "@/services/admin.service";
 import type { AdminUser, PlatformStats, PlatformShow, ShowStatus, UserRole } from "@/types";
 
@@ -565,11 +565,11 @@ export default function AdminPage() {
             />
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
                 {pagedShows.map((ps) => (
                   <div
                     key={ps.show.id}
-                    className="flex gap-3 rounded-2xl bg-surface border border-border p-4 hover:border-primary/20 transition-colors"
+                    className="flex gap-3 h-full rounded-2xl bg-surface border border-border p-4 hover:border-primary/20 transition-colors"
                   >
                     {/* Poster */}
                     <div className="w-16 h-24 rounded-lg overflow-hidden bg-bg flex-shrink-0">
@@ -606,20 +606,23 @@ export default function AdminPage() {
                         )}
                       </div>
 
-                      {/* Watchers */}
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {ps.watchers.slice(0, 5).map((w, i) => (
+                      {/* Watchers: compact single row, full list on hover */}
+                      <div className="flex items-center gap-1.5 mt-2.5 min-w-0">
+                        {ps.watchers.slice(0, 4).map((w, i) => (
                           <span
                             key={i}
-                            className={`text-[10px] px-1.5 py-0.5 rounded-md border ${STATUS_COLORS[w.status]}`}
-                            title={`${w.username}: ${STATUS_LABELS[w.status]}`}
+                            title={`${w.username} · ${STATUS_LABELS[w.status]}`}
+                            className="w-6 h-6 rounded-full border border-border flex items-center justify-center text-[10px] font-semibold text-text-muted bg-bg/60 flex-shrink-0"
                           >
-                            {w.username}
+                            {w.username.charAt(0).toUpperCase()}
                           </span>
                         ))}
-                        {ps.watchers.length > 5 && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded-md border border-border text-text-subtle">
-                            +{ps.watchers.length - 5}
+                        {ps.watchers.length > 4 && (
+                          <span
+                            title={ps.watchers.map((w) => w.username).join(", ")}
+                            className="h-6 px-2 rounded-full border border-border text-[10px] flex items-center text-text-subtle bg-bg/60 flex-shrink-0"
+                          >
+                            +{ps.watchers.length - 4}
                           </span>
                         )}
                       </div>
