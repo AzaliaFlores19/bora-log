@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { X, Star, Tv, Clock, Clapperboard } from "lucide-react";
 import { MOOD_ICONS } from "@/lib/mood-icons";
 import type { AdminUser, UserShow, ShowStatus } from "@/types";
-import { posterUrl } from "@/lib/media";
+import { posterSrc } from "@/lib/media";
+import { Artwork } from "@/components/ui/Artwork";
 import {
   STATUS_LABELS,
   STATUS_DOT_COLORS,
@@ -124,14 +125,8 @@ export function UserWatchLogDrawer({ user, open, onClose }: UserWatchLogDrawerPr
                     className="flex gap-3 rounded-xl bg-bg/40 border border-border p-3 hover:border-primary/20 transition-colors"
                   >
                     {/* Poster */}
-                    <div className="w-12 h-18 rounded-lg overflow-hidden bg-bg flex-shrink-0">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={posterUrl(us.show)}
-                        alt={us.show.title}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
+                    <div className="relative w-12 aspect-[2/3] rounded-lg overflow-hidden bg-bg flex-shrink-0">
+                      <Artwork src={posterSrc(us.show)} alt={us.show.title} sizes="48px" />
                     </div>
 
                     {/* Info */}

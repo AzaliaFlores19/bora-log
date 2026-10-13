@@ -5,7 +5,8 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { RatingStars } from "@/components/ui/RatingStars";
 import { Badge } from "@/components/ui/Badge";
-import { posterUrl, backdropUrl } from "@/lib/media";
+import { posterSrc, backdropSrc } from "@/lib/media";
+import { Artwork } from "@/components/ui/Artwork";
 import { STATUS_LABELS, TIME_COMMIT_LABELS, MOOD_LABELS, formatDate, formatRuntime } from "@/lib/constants";
 import type { Show, UserShow, ShowStatus, Mood, TimeCommit } from "@/types";
 import { Star, Clock, Calendar, Tv, Check } from "lucide-react";
@@ -70,11 +71,11 @@ export function ShowFormModal({ open, onClose, show, existingEntry, onSubmit }: 
     <Modal open={open} onClose={onClose} size="lg">
       {/* Hero backdrop */}
       <div className="relative -mx-6 -mt-6 h-40 overflow-hidden bg-bg">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={backdropUrl(show)}
+        <Artwork
+          src={backdropSrc(show) ?? posterSrc(show)}
           alt=""
-          className={`w-full h-full object-cover ${show.backdrop_path ? "" : "blur-2xl scale-110 opacity-70"}`}
+          sizes="(max-width: 768px) 100vw, 672px"
+          className={show.backdrop_path ? "" : "blur-2xl scale-110 opacity-70"}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/60 to-transparent" />
         <button
@@ -87,9 +88,8 @@ export function ShowFormModal({ open, onClose, show, existingEntry, onSubmit }: 
 
       {/* Header */}
       <div className="flex gap-4 -mt-8 relative mb-6">
-        <div className="w-24 h-36 rounded-xl overflow-hidden bg-bg border-2 border-surface flex-shrink-0 shadow-xl">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={posterUrl(show)} alt={show.title} className="w-full h-full object-cover" />
+        <div className="relative w-24 h-36 rounded-xl overflow-hidden bg-bg border-2 border-surface flex-shrink-0 shadow-xl">
+          <Artwork src={posterSrc(show)} alt={show.title} sizes="96px" />
         </div>
         <div className="flex-1 pt-8">
           <h2 className="font-display text-xl font-extrabold text-text">{show.title}</h2>

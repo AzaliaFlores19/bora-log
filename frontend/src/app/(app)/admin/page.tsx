@@ -33,7 +33,8 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { UserWatchLogDrawer } from "@/components/admin/UserWatchLogDrawer";
 import { EditUserModal } from "@/components/admin/EditUserModal";
-import { posterUrl } from "@/lib/media";
+import { posterSrc } from "@/lib/media";
+import { Artwork } from "@/components/ui/Artwork";
 import { STATUS_DOT_COLORS, STATUS_LABELS } from "@/lib/constants";
 import * as adminService from "@/services/admin.service";
 import type { AdminUser, PlatformStats, PlatformShow, ShowStatus, UserRole } from "@/types";
@@ -572,14 +573,8 @@ export default function AdminPage() {
                     className="flex gap-3 h-full rounded-2xl bg-surface border border-border p-4 hover:border-primary/20 transition-colors"
                   >
                     {/* Poster */}
-                    <div className="w-16 h-24 rounded-lg overflow-hidden bg-bg flex-shrink-0">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={posterUrl(ps.show)}
-                        alt={ps.show.title}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
+                    <div className="relative w-16 h-24 rounded-lg overflow-hidden bg-bg flex-shrink-0">
+                      <Artwork src={posterSrc(ps.show)} alt={ps.show.title} sizes="64px" />
                     </div>
 
                     {/* Info */}

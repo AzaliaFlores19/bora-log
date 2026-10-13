@@ -1,5 +1,6 @@
 import type { TMDBSearchResult } from "@/types";
-import { searchPosterUrl } from "@/lib/media";
+import { searchPosterSrc } from "@/lib/media";
+import { Artwork } from "@/components/ui/Artwork";
 import { Star, Plus, Check, Tv } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -14,14 +15,8 @@ export function SearchResultCard({ result, isTracked, onAdd }: SearchResultCardP
   return (
     <div className="group flex gap-4 rounded-2xl bg-surface border border-border p-3 card-hover">
       {/* Poster */}
-      <div className="relative w-20 sm:w-24 flex-shrink-0 rounded-xl overflow-hidden bg-bg">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={searchPosterUrl(result)}
-          alt={result.title}
-          className="w-full h-full object-cover"
-          loading="lazy"
-        />
+      <div className="relative w-20 sm:w-24 aspect-[2/3] flex-shrink-0 rounded-xl overflow-hidden bg-bg">
+        <Artwork src={searchPosterSrc(result)} alt={result.title} sizes="96px" />
       </div>
 
       {/* Info */}
