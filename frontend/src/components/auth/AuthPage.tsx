@@ -11,9 +11,9 @@ import {
   Eye,
   EyeOff,
   Heart,
-  Bookmark,
-  Star,
-  Film,
+  Clapperboard,
+  Clock3,
+  Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
@@ -22,6 +22,14 @@ import { Spinner } from "@/components/ui/Spinner";
 interface AuthPageProps {
   initialMode?: "login" | "signup";
 }
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const FEATURES = [
+  { icon: Clapperboard, title: "Your whole library", text: "Movies and series in one cozy, filterable log." },
+  { icon: Heart, title: "Mood by mood", text: "Tag how each title made you feel." },
+  { icon: Clock3, title: "Time you invested", text: "From a quick episode to a full binge." },
+];
 
 export function AuthPage({ initialMode = "login" }: AuthPageProps) {
   const { user, loading: authLoading, signIn, signUp } = useAuth();
@@ -32,6 +40,7 @@ export function AuthPage({ initialMode = "login" }: AuthPageProps) {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{ username?: string; email?: string; password?: string }>({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -41,16 +50,35 @@ export function AuthPage({ initialMode = "login" }: AuthPageProps) {
     }
   }, [authLoading, user, router]);
 
+  function switchMode(nextMode: "login" | "signup") {
+    setMode(nextMode);
+    setError(null);
+    setFieldErrors({});
+  }
+
+  function validate() {
+    const errs: typeof fieldErrors = {};
+    if (mode === "signup" && !username.trim()) errs.username = "Choose a username";
+    if (!email.trim()) errs.email = "Email is required";
+    else if (!EMAIL_RE.test(email.trim())) errs.email = "Enter a valid email address";
+    if (!password) errs.password = "Password is required";
+    else if (password.length < 6) errs.password = "At least 6 characters";
+    setFieldErrors(errs);
+    return Object.keys(errs).length === 0;
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!validate()) return;
+
     setLoading(true);
     try {
       if (mode === "login") {
-        await signIn(email, password);
+        await signIn(email.trim(), password);
         addToast("success", "Welcome back");
       } else {
-        await signUp(email, password, username);
+        await signUp(email.trim(), password, username.trim());
         addToast("success", "Your account is ready");
       }
       router.push("/dashboard");
@@ -61,141 +89,179 @@ export function AuthPage({ initialMode = "login" }: AuthPageProps) {
     }
   }
 
-  function switchMode(nextMode: "login" | "signup") {
-    setMode(nextMode);
-    setError(null);
-  }
+  const inputBase =
+    "w-full pl-11 pr-4 py-2.5 rounded-xl text-sm text-text placeholder:text-text-subtle bg-bg/40 border transition-all focus:outline-none focus:ring-2 focus:ring-primary/20";
 
   return (
-    <main className="min-h-screen bg-bg flex items-center justify-center p-4 sm:p-8 relative overflow-hidden">
-      {/* Soft ambient blobs */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-32 -right-24 w-[30rem] h-[30rem] rounded-full bg-primary/10 blur-[140px]" />
-        <div className="absolute -bottom-32 -left-24 w-[30rem] h-[30rem] rounded-full bg-accent/10 blur-[140px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[24rem] h-[24rem] rounded-full bg-primary/5 blur-[100px]" />
+    <main className="min-h-screen bg-bg relative overflow-hidden">
+      {/* Ambient background */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-40 -left-24 w-[34rem] h-[34rem] rounded-full bg-primary/15 blur-[150px]" />
+        <div className="absolute -bottom-40 -right-24 w-[34rem] h-[34rem] rounded-full bg-accent/15 blur-[150px]" />
       </div>
 
-      {/* Floating decorative icons */}
-      <div className="absolute inset-0 pointer-events-none hidden sm:block">
-        <Tv className="absolute top-[14%] left-[12%] w-7 h-7 text-primary/15 rotate-[-12deg]" />
-        <Heart className="absolute top-[22%] right-[14%] w-6 h-6 text-accent/15 rotate-[18deg]" />
-        <Star className="absolute bottom-[24%] left-[16%] w-5 h-5 text-warning/20 rotate-[8deg]" />
-        <Bookmark className="absolute bottom-[18%] right-[18%] w-6 h-6 text-primary/15 rotate-[-6deg]" />
-        <Film className="absolute top-[45%] left-[8%] w-8 h-8 text-text-subtle/15 rotate-[22deg]" />
-      </div>
+      <div className="relative z-10 grid lg:grid-cols-2 min-h-screen">
+        {/* ── Visual panel ─────────────────────────────────────────── */}
+        <section className="relative hidden lg:flex flex-col justify-between overflow-hidden p-12 xl:p-16 border-r border-border">
+          <div className="absolute inset-0 opacity-[0.5]">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-transparent to-accent/15" />
+            <div className="absolute top-[18%] left-[14%] w-8 h-8 text-primary/25 rotate-[-12deg]">
+              <Tv className="w-full h-full" />
+            </div>
+            <div className="absolute top-[62%] right-[16%] w-10 h-10 text-accent/25 rotate-[16deg]">
+              <Clapperboard className="w-full h-full" />
+            </div>
+            <div className="absolute bottom-[16%] left-[22%] w-6 h-6 text-warning/30 rotate-[10deg]">
+              <Sparkles className="w-full h-full" />
+            </div>
+          </div>
 
-      {/* === Auth Card === */}
-      <div className="relative w-full max-w-[400px] animate-fade-in-up">
-        {/* Brand header */}
-        <div className="flex flex-col items-center mb-5">
-          <div className="relative mb-2.5">
-            <div className="w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/30">
+          {/* Brand */}
+          <div className="relative flex items-center gap-3">
+            <div className="w-11 h-11 rounded-2xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/30">
               <Tv className="w-6 h-6 text-primary-fg" />
             </div>
-            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-accent/20 border border-accent/30 flex items-center justify-center">
-              <Heart className="w-2 h-2 text-accent" />
-            </span>
+            <span className="font-display text-2xl font-extrabold gradient-text">Bora-Log</span>
           </div>
-          <h1 className="font-display text-lg font-extrabold text-text tracking-tight">Bora-Log</h1>
-        </div>
 
-        {/* Card body */}
-        <div className="relative rounded-3xl bg-surface/90 backdrop-blur-xl border border-border shadow-2xl shadow-black/20 overflow-hidden">
-          {/* Top accent strip */}
-          <div className="h-1 gradient-primary" />
-
-          {/* Header section */}
-          <div className="px-7 pt-6 pb-4 text-center">
-            <p className="text-[10px] font-bold text-primary uppercase tracking-[0.22em] mb-1">
-              {mode === "login" ? "Admit One" : "New Ticket"}
+          {/* Headline */}
+          <div className="relative max-w-md">
+            <h1 className="font-display text-4xl xl:text-5xl font-extrabold text-text leading-[1.1] mb-4">
+              Your media diary,
+              <br />
+              <span className="gradient-text">mood by mood.</span>
+            </h1>
+            <p className="text-text-muted text-lg mb-10">
+              Catalog the movies and series you watch, how they made you feel and how much time they took.
             </p>
-            <h2 className="font-display text-xl font-extrabold text-text tracking-tight">
-              {mode === "login" ? "Welcome back" : "Join the club"}
-            </h2>
-            <p className="text-text-subtle text-[13px] mt-1">
-              {mode === "login" ? "Pick up where you left off." : "Build your cozy TV library."}
-            </p>
+
+            <ul className="space-y-5">
+              {FEATURES.map(({ icon: Icon, title, text }) => (
+                <li key={title} className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary flex-shrink-0">
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-text">{title}</p>
+                    <p className="text-sm text-text-muted">{text}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {/* Single perforated divider */}
-          <div className="relative h-4 ticket-perforation mx-3">
-            <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-bg" />
-            <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-bg" />
-          </div>
+          <p className="relative text-xs text-text-subtle">Keep your watch log cozy and kind.</p>
+        </section>
 
-          {/* Form section */}
-          <div className="px-7 pb-7 pt-3">
-            {/* Sliding pill tab */}
-            <div className="relative flex gap-1 p-1 rounded-xl bg-bg/50 mb-5">
+        {/* ── Form panel ───────────────────────────────────────────── */}
+        <section className="flex items-center justify-center p-5 sm:p-10">
+          <div className="w-full max-w-[400px] animate-fade-in-up">
+            {/* Compact brand for mobile */}
+            <div className="lg:hidden flex flex-col items-center mb-6">
+              <div className="w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/30">
+                <Tv className="w-6 h-6 text-primary-fg" />
+              </div>
+              <span className="font-display text-lg font-extrabold gradient-text mt-2">Bora-Log</span>
+            </div>
+
+            <div className="text-center mb-6">
+              <p className="text-[10px] font-bold text-primary uppercase tracking-[0.22em] mb-1">
+                {mode === "login" ? "Admit One" : "New Ticket"}
+              </p>
+              <h2 className="font-display text-2xl font-extrabold text-text tracking-tight">
+                {mode === "login" ? "Welcome back" : "Join the club"}
+              </h2>
+              <p className="text-text-subtle text-sm mt-1">
+                {mode === "login" ? "Pick up where you left off." : "Build your cozy watch library."}
+              </p>
+            </div>
+
+            {/* Segmented control */}
+            <div className="relative flex gap-1 p-1 rounded-xl bg-surface border border-border mb-5">
               <div
-                className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-lg bg-surface shadow-sm border border-border transition-transform duration-300 ease-out ${mode === "signup" ? "translate-x-[calc(100%+8px)]" : "translate-x-0"}`}
+                className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-lg gradient-primary shadow-sm transition-transform duration-300 ease-out ${
+                  mode === "signup" ? "translate-x-[calc(100%+8px)]" : "translate-x-0"
+                }`}
               />
               <button
                 onClick={() => switchMode("login")}
-                className={`relative flex-1 py-2 rounded-lg text-[13px] font-semibold transition-colors duration-200 ${mode === "login" ? "text-text" : "text-text-muted hover:text-text"}`}
+                className={`relative flex-1 py-2 rounded-lg text-[13px] font-semibold transition-colors duration-200 ${
+                  mode === "login" ? "text-primary-fg" : "text-text-muted hover:text-text"
+                }`}
               >
                 Sign In
               </button>
               <button
                 onClick={() => switchMode("signup")}
-                className={`relative flex-1 py-2 rounded-lg text-[13px] font-semibold transition-colors duration-200 ${mode === "signup" ? "text-text" : "text-text-muted hover:text-text"}`}
+                className={`relative flex-1 py-2 rounded-lg text-[13px] font-semibold transition-colors duration-200 ${
+                  mode === "signup" ? "text-primary-fg" : "text-text-muted hover:text-text"
+                }`}
               >
                 Create Account
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-3">
+            <form onSubmit={handleSubmit} className="space-y-3.5" noValidate>
               {mode === "signup" && (
-                <div className="auth-input-wrap">
-                  <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle z-10" />
-                  <input
-                    type="text"
-                    name="username"
-                    placeholder="Pick a username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="w-full pl-11 pr-4 py-2.5 rounded-lg text-sm text-text placeholder:text-text-subtle focus:outline-none focus:ring-2 focus:ring-primary/15"
-                    required
-                  />
-                  <div className="auth-input-glow" />
+                <div>
+                  <div className="relative">
+                    <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle z-10" />
+                    <input
+                      type="text"
+                      name="username"
+                      autoComplete="username"
+                      placeholder="Pick a username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      className={`${inputBase} ${fieldErrors.username ? "border-error/60" : "border-border focus:border-primary/50"}`}
+                    />
+                  </div>
+                  {fieldErrors.username && <p className="mt-1.5 text-xs text-error pl-1">{fieldErrors.username}</p>}
                 </div>
               )}
-              <div className="auth-input-wrap">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle z-10" />
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-11 pr-4 py-2.5 rounded-lg text-sm text-text placeholder:text-text-subtle focus:outline-none focus:ring-2 focus:ring-primary/15"
-                  required
-                />
-                <div className="auth-input-glow" />
+
+              <div>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle z-10" />
+                  <input
+                    type="email"
+                    name="email"
+                    autoComplete="email"
+                    placeholder="Email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={`${inputBase} ${fieldErrors.email ? "border-error/60" : "border-border focus:border-primary/50"}`}
+                  />
+                </div>
+                {fieldErrors.email && <p className="mt-1.5 text-xs text-error pl-1">{fieldErrors.email}</p>}
               </div>
-              <div className="auth-input-wrap">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle z-10" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-11 pr-11 py-2.5 rounded-lg text-sm text-text placeholder:text-text-subtle focus:outline-none focus:ring-2 focus:ring-primary/15"
-                  required
-                />
-                <div className="auth-input-glow" />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-text-subtle hover:text-text-muted transition-colors z-10"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+
+              <div>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle z-10" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    autoComplete={mode === "login" ? "current-password" : "new-password"}
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className={`${inputBase} !pr-11 ${fieldErrors.password ? "border-error/60" : "border-border focus:border-primary/50"}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-text-subtle hover:text-text-muted transition-colors z-10"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {fieldErrors.password && <p className="mt-1.5 text-xs text-error pl-1">{fieldErrors.password}</p>}
               </div>
 
               {error && (
-                <div className="px-3.5 py-2.5 rounded-lg bg-error/10 border border-error/30 text-error text-sm flex items-start gap-2">
+                <div className="px-3.5 py-2.5 rounded-xl bg-error/10 border border-error/30 text-error text-sm flex items-start gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-error mt-1.5 flex-shrink-0" />
                   {error}
                 </div>
@@ -204,7 +270,7 @@ export function AuthPage({ initialMode = "login" }: AuthPageProps) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full mt-1 py-3 rounded-xl gradient-primary text-primary-fg font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/25"
+                className="w-full mt-1 py-3 rounded-xl gradient-primary text-primary-fg font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-bg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/25"
               >
                 {loading ? (
                   <Spinner size={18} />
@@ -217,7 +283,6 @@ export function AuthPage({ initialMode = "login" }: AuthPageProps) {
               </button>
             </form>
 
-            {/* Switch mode link */}
             <p className="text-center text-sm text-text-subtle mt-4">
               {mode === "login" ? "Don't have a ticket yet?" : "Already have a ticket?"}
               <button
@@ -227,12 +292,13 @@ export function AuthPage({ initialMode = "login" }: AuthPageProps) {
                 {mode === "login" ? "Get one" : "Sign in"}
               </button>
             </p>
-          </div>
-        </div>
 
-        <p className="text-center text-xs text-text-subtle mt-4">
-          By continuing you agree to keep your watch log cozy and kind.
-        </p>
+            <div className="mt-6 flex items-center justify-center gap-2 text-[11px] text-text-subtle">
+              <Sparkles className="w-3.5 h-3.5 text-primary/70" />
+              Demo: emails starting with <span className="font-mono text-text-muted">admin</span> get admin access
+            </div>
+          </div>
+        </section>
       </div>
     </main>
   );
