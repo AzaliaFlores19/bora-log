@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Star, Clock, Calendar, Tv, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Clock, Calendar, Tv, Pencil, Trash2 } from "lucide-react";
 import type { UserShow } from "@/types";
 import * as showService from "@/services/show.service";
 import { useShows } from "@/hooks/useShows";
@@ -12,13 +12,14 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { posterUrl, backdropUrl } from "@/lib/media";
+import { Artwork } from "@/components/ui/Artwork";
+import { RatingStars } from "@/components/ui/RatingStars";
+import { posterSrc, backdropSrc } from "@/lib/media";
 import {
   STATUS_LABELS,
   STATUS_DOT_COLORS,
   TIME_COMMIT_LABELS,
   MOOD_LABELS,
-  formatDate,
   formatRuntime,
 } from "@/lib/constants";
 import { MOOD_ICONS } from "@/lib/mood-icons";
@@ -98,7 +99,9 @@ export default function ShowDetailPage() {
     );
   }
 
-  const TypeIcon = Tv;
+  const backdrop = backdropSrc(show);
+  const poster = posterSrc(show);
+  const year = show.release_date ? new Date(show.release_date).getFullYear() : null;
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
@@ -111,116 +114,122 @@ export default function ShowDetailPage() {
         <span className="text-sm font-medium">Back to Dashboard</span>
       </button>
 
-      {/* Hero backdrop */}
-      <div className="relative rounded-3xl overflow-hidden mb-6 h-56 sm:h-72 bg-bg">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={backdropUrl(show)}
-          alt=""
-          className={`w-full h-full object-cover ${show.backdrop_path ? "" : "blur-2xl scale-110 opacity-70"}`}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/70 to-transparent" />
+      <div className="relative">
+        {/* Banner (real backdrop, or blurred poster as fallback) */}
+        <div className="relative rounded-3xl overflow-hidden h-48 sm:h-64 bg-bg">
+          <Artwork
+            src={backdrop ?? poster}
+            alt=""
+            priority
+            sizes="(max-width: 1024px) 100vw, 1024px"
+            className={backdrop ? "" : "blur-2xl scale-110 opacity-70"}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/70 to-transparent" />
+        </div>
+
+        {/* Poster + info, top-aligned */}
+        <div className="relative -mt-24 sm:-mt-28 grid grid-cols-1 sm:grid-cols-[auto,1fr] gap-6">
+          <div className="mx-auto sm:mx-0 w-36 sm:w-48">
+            <div className="relative aspect-[2/3] rounded-2xl overflow-hidden bg-bg border-2 border-surface shadow-xl">
+              <Artwork src={poster} alt={show.title} priority sizes="192px" />
+            </div>
+          </div>
+
+          <div className="sm:pt-28">
+            <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-text">{show.title}</h1>
+
+            <div className="flex flex-wrap items-center gap-2 mt-2.5 mb-4">
+              <Badge className="border-border bg-bg/50 text-text-subtle">
+                <Tv className="w-3 h-3" />
+                Serie
+              </Badge>
+              {year && (
+                <Badge className="border-border bg-bg/50 text-text-subtle">
+                  <Calendar className="w-3 h-3" />
+                  {year}
+                </Badge>
+              )}
+              {show.runtime && (
+                <Badge className="border-border bg-bg/50 text-text-subtle">
+                  <Clock className="w-3 h-3" />
+                  {formatRuntime(show.runtime)}
+                </Badge>
+              )}
+            </div>
+
+            {show.overview && <p className="text-text-muted leading-relaxed max-w-2xl">{show.overview}</p>}
+          </div>
+        </div>
       </div>
 
-      {/* Main content */}
-      <div className="flex flex-col sm:flex-row gap-6 -mt-32 relative">
-        {/* Poster */}
-        <div className="w-36 sm:w-48 flex-shrink-0 mx-auto sm:mx-0">
-          <div className="rounded-2xl overflow-hidden bg-bg border-2 border-surface shadow-xl">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={posterUrl(show)} alt={show.title} className="w-full h-full object-cover" />
+      {/* Your tracking — full width, equal cells */}
+      <div className="mt-6 rounded-2xl bg-surface border border-border p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-display font-bold text-text">Your Tracking</h3>
+          <div className="flex gap-2">
+            <Button variant="secondary" size="sm" onClick={() => openEditModal(userShow)}>
+              <Pencil className="w-3.5 h-3.5" />
+              Edit
+            </Button>
+            <Button variant="danger" size="sm" onClick={handleRemove}>
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
           </div>
         </div>
 
-        {/* Info */}
-        <div className="flex-1 sm:pt-32">
-          <h1 className="font-display text-3xl font-extrabold text-text mb-2">{show.title}</h1>
-
-          {/* Meta badges */}
-          <div className="flex flex-wrap items-center gap-2 mb-4">
-            <Badge className="border-border bg-bg/50 text-text-subtle">
-              <TypeIcon className="w-3 h-3" />
-              TV Show
-            </Badge>
-            {show.release_date && (
-              <Badge className="border-border bg-bg/50 text-text-subtle">
-                <Calendar className="w-3 h-3" />
-                {formatDate(show.release_date)}
-              </Badge>
-            )}
-            {show.runtime && (
-              <Badge className="border-border bg-bg/50 text-text-subtle">
-                <Clock className="w-3 h-3" />
-                {formatRuntime(show.runtime)}
-              </Badge>
-            )}
-          </div>
-
-          {/* Overview */}
-          {show.overview && <p className="text-text-muted leading-relaxed mb-6 max-w-2xl">{show.overview}</p>}
-
-          {/* User's tracking info */}
-          <div className="rounded-2xl bg-surface border border-border p-5 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-display font-bold text-text">Your Tracking</h3>
-              <div className="flex gap-2">
-                <Button variant="secondary" size="sm" onClick={() => openEditModal(userShow)}>
-                  <Pencil className="w-3.5 h-3.5" />
-                  Edit
-                </Button>
-                <Button variant="danger" size="sm" onClick={handleRemove}>
-                  <Trash2 className="w-3.5 h-3.5" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {/* Status */}
+          <div>
+            <span className="text-xs text-text-subtle uppercase tracking-wide block mb-1.5">Status</span>
+            <div className="flex items-center gap-2">
               <span className={`w-2.5 h-2.5 rounded-full ${STATUS_DOT_COLORS[userShow.status]}`} />
               <span className="text-sm font-medium text-text">{STATUS_LABELS[userShow.status]}</span>
             </div>
+          </div>
 
-            {userShow.rating !== null && (
-              <div>
-                <span className="text-xs text-text-subtle uppercase tracking-wide block mb-1.5">Your Rating</span>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: 10 }, (_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-4 h-4 ${i < userShow.rating! ? "fill-warning text-warning" : "text-text-subtle"}`}
-                    />
-                  ))}
-                  <span className="ml-2 text-sm text-text-muted">{userShow.rating}/10</span>
-                </div>
+          {/* Rating */}
+          <div>
+            <span className="text-xs text-text-subtle uppercase tracking-wide block mb-1.5">Your Rating</span>
+            {userShow.rating !== null ? (
+              <div className="flex items-center gap-2 flex-wrap">
+                <RatingStars value={userShow.rating} max={10} size={13} />
+                <span className="text-sm text-text-muted">{userShow.rating}/10</span>
               </div>
+            ) : (
+              <span className="text-sm text-text-subtle">Not rated</span>
             )}
+          </div>
 
-            {userShow.moods.length > 0 && (
-              <div>
-                <span className="text-xs text-text-subtle uppercase tracking-wide block mb-1.5">Moods</span>
-                <div className="flex flex-wrap gap-2">
-                  {userShow.moods.map((m) => {
-                    const MoodIcon = MOOD_ICONS[m];
-                    return (
-                      <Badge key={m} className="border-primary/20 bg-primary/5 text-primary">
-                        <MoodIcon className="w-3 h-3" />
-                        {MOOD_LABELS[m]}
-                      </Badge>
-                    );
-                  })}
-                </div>
+          {/* Moods */}
+          <div>
+            <span className="text-xs text-text-subtle uppercase tracking-wide block mb-1.5">Moods</span>
+            {userShow.moods.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5">
+                {userShow.moods.map((m) => {
+                  const MoodIcon = MOOD_ICONS[m];
+                  return (
+                    <Badge key={m} className="border-primary/20 bg-primary/5 text-primary">
+                      <MoodIcon className="w-3 h-3" />
+                      {MOOD_LABELS[m]}
+                    </Badge>
+                  );
+                })}
               </div>
+            ) : (
+              <span className="text-sm text-text-subtle">No moods</span>
             )}
+          </div>
 
-            {userShow.time_commit && (
-              <div>
-                <span className="text-xs text-text-subtle uppercase tracking-wide block mb-1.5">
-                  Time Commitment
-                </span>
-                <Badge className="border-border bg-bg/50 text-text-muted">
-                  <Clock className="w-3 h-3" />
-                  {TIME_COMMIT_LABELS[userShow.time_commit]}
-                </Badge>
-              </div>
+          {/* Time commitment */}
+          <div>
+            <span className="text-xs text-text-subtle uppercase tracking-wide block mb-1.5">Time Commitment</span>
+            {userShow.time_commit ? (
+              <Badge className="border-border bg-bg/50 text-text-muted">
+                <Clock className="w-3 h-3" />
+                {TIME_COMMIT_LABELS[userShow.time_commit]}
+              </Badge>
+            ) : (
+              <span className="text-sm text-text-subtle">Not set</span>
             )}
           </div>
         </div>
