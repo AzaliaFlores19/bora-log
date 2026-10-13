@@ -1,4 +1,4 @@
-import type { ShowStatus, TimeCommit, Mood, MediaType } from "@/types";
+import type { ShowStatus, TimeCommit, Mood, MediaType, ThemeOption } from "@/types";
 
 export const STATUS_LABELS: Record<ShowStatus, string> = {
   watching: "Watching",
@@ -70,3 +70,12 @@ export function formatRating(rating: number | null): string {
   if (rating === null) return "—";
   return rating.toFixed(1);
 }
+
+export const themeOptions: ThemeOption[] = [
+  { name: "purple", label: "Bora-Log", swatch: "#a855f7" },
+  { name: "ocean", label: "Ocean", swatch: "#38bdf8" },
+  { name: "forest", label: "Forest", swatch: "#4ade80" },
+  { name: "sunset", label: "Sunset", swatch: "#fb923c" },
+  { name: "rose", label: "Rose", swatch: "#f43f5e" },
+  { name: "mono", label: "Mono", swatch: "#e5e7eb" },
+];

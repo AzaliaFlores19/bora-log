@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Check, Palette } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
-import { themeOptions } from "@/lib/mock-data";
+import { themeOptions } from "@/lib/constants";
 
 export function ThemeSwitcher() {
   const { theme, setTheme } = useTheme();
