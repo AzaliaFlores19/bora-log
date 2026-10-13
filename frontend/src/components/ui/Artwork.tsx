@@ -8,6 +8,7 @@ interface ArtworkProps {
   className?: string;
   priority?: boolean;
   iconClassName?: string;
+  objectFit?: "cover" | "contain";
 }
 
 /**
@@ -21,6 +22,7 @@ export function Artwork({
   className = "",
   priority = false,
   iconClassName = "w-1/3 h-1/3 max-w-10 max-h-10 text-text-subtle/40",
+  objectFit = "cover",
 }: ArtworkProps) {
   if (!src) {
     return (
@@ -32,5 +34,14 @@ export function Artwork({
     );
   }
 
-  return <Image src={src} alt={alt} fill sizes={sizes} priority={priority} className={`object-cover ${className}`} />;
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      sizes={sizes}
+      priority={priority}
+      className={`${objectFit === "contain" ? "object-contain" : "object-cover"} ${className}`}
+    />
+  );
 }

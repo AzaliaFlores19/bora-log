@@ -115,15 +115,34 @@ export default function ShowDetailPage() {
       </button>
 
       <div className="relative">
-        {/* Banner (real backdrop, or blurred poster as fallback) */}
+        {/* Banner: full image (contain) over a blurred fill; blurred poster as fallback */}
         <div className="relative rounded-3xl overflow-hidden h-56 sm:h-72 lg:h-80 bg-bg">
-          <Artwork
-            src={backdrop ?? poster}
-            alt=""
-            priority
-            sizes="(max-width: 1024px) 100vw, 1024px"
-            className={backdrop ? "" : "blur-2xl scale-110 opacity-70"}
-          />
+          {backdrop ? (
+            <>
+              <Artwork
+                src={backdrop}
+                alt=""
+                priority
+                sizes="(max-width: 1024px) 100vw, 1024px"
+                className="blur-2xl scale-110 opacity-60"
+              />
+              <Artwork
+                src={backdrop}
+                alt=""
+                priority
+                objectFit="contain"
+                sizes="(max-width: 1024px) 100vw, 1024px"
+              />
+            </>
+          ) : (
+            <Artwork
+              src={poster}
+              alt=""
+              priority
+              sizes="(max-width: 1024px) 100vw, 1024px"
+              className="blur-2xl scale-110 opacity-70"
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/70 to-transparent" />
         </div>
 
