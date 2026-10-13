@@ -18,7 +18,7 @@ const sora = Sora({
 export const metadata: Metadata = {
   title: "Bora-Log - Track Your Media Journey",
   description:
-    "A cozy personal media diary to track the movies and TV shows you watch, the moods you felt and the time you spent.",
+    "A cozy personal media diary to track the shows you watch, the moods you felt and the time you spent.",
 };
 
 export default function RootLayout({

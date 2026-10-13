@@ -144,16 +144,16 @@ export function AuthPage({ initialMode = "login" }: AuthPageProps) {
           : `If an account exists for ${sentEmail}, a reset link is on its way.`;
 
   return (
-    <main className="relative min-h-[100dvh] bg-bg flex items-center justify-center p-4 sm:p-6 lg:p-8">
+    <main className="relative min-h-[100dvh] bg-bg flex p-4 sm:p-6 lg:p-8">
       {/* Ambient background */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -left-24 w-[32rem] h-[32rem] rounded-full bg-primary/15 blur-[150px]" />
         <div className="absolute -bottom-40 -right-24 w-[32rem] h-[32rem] rounded-full bg-accent/15 blur-[150px]" />
       </div>
 
-      <div className="relative z-10 w-full max-w-4xl">
+      <div className="relative z-10 w-full max-w-4xl m-auto">
         {/* Diary spread */}
-        <div className="relative rounded-[28px] bg-surface border border-border shadow-2xl shadow-black/25 overflow-hidden animate-fade-in-up">
+        <div className="relative rounded-[24px] lg:rounded-[28px] bg-surface border border-border shadow-2xl shadow-black/25 overflow-hidden animate-fade-in-up">
           {/* Top accent strip */}
           <div className="h-1.5 gradient-primary" />
 
@@ -166,33 +166,37 @@ export function AuthPage({ initialMode = "login" }: AuthPageProps) {
 
           <div className="grid lg:grid-cols-2">
             {/* ── Left page: brand + mood constellation ─────────── */}
-            <section className="relative px-7 py-8 sm:px-10 lg:py-12 flex flex-col justify-center">
+            <section className="relative px-6 pt-6 pb-2 sm:px-10 sm:pt-8 lg:py-12 flex flex-col justify-center">
               <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-2xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/30">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/30">
                   <Tv className="w-5 h-5 text-primary-fg" />
                 </div>
                 <span className="font-display text-lg font-extrabold gradient-text">Bora-Log</span>
               </div>
 
-              <h1 className="font-display text-3xl sm:text-[2rem] font-extrabold text-text leading-[1.12] mt-6">
+              <h1 className="font-display text-2xl sm:text-3xl lg:text-[2rem] font-extrabold text-text leading-[1.12] mt-5 sm:mt-6">
                 How did it make
                 <br />
                 you <span className="gradient-text">feel?</span>
               </h1>
-              <p className="text-text-muted text-sm mt-3 max-w-xs">
-                A cozy diary for the movies and series you watch — mood by mood.
+              <p className="hidden sm:block text-text-muted text-sm mt-3 max-w-xs">
+                A cozy diary for the shows you watch.
               </p>
 
               {/* Mood constellation */}
-              <div className="mt-8 flex flex-wrap gap-2.5 sm:gap-3 max-w-[280px]">
+              <div className="mt-5 lg:mt-8 flex flex-nowrap lg:flex-wrap gap-2 sm:gap-2.5 lg:gap-3 max-w-full lg:max-w-[280px]">
                 {MOODS.map(({ mood, color, rotate }, i) => {
                   const Icon = MOOD_ICONS[mood];
                   return (
-                    <div key={mood} style={{ transform: `rotate(${rotate}deg)` }}>
+                    <div
+                      key={mood}
+                      className={i >= 5 ? "hidden sm:block" : ""}
+                      style={{ transform: `rotate(${rotate}deg)` }}
+                    >
                       <div className="animate-float" style={{ animationDelay: `${i * 0.35}s` }}>
                         <div
                           title={MOOD_LABELS[mood]}
-                          className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-2xl border transition-transform duration-200 hover:scale-110"
+                          className="flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-2xl border transition-transform duration-200 hover:scale-110"
                           style={{ background: `${color}1f`, borderColor: `${color}33`, color }}
                         >
                           <Icon className="w-[18px] h-[18px]" />
@@ -205,10 +209,10 @@ export function AuthPage({ initialMode = "login" }: AuthPageProps) {
             </section>
 
             {/* ── Right page: the form ─────────────────────────── */}
-            <section className="relative px-7 pb-8 pt-2 sm:px-10 lg:py-12 flex items-center">
+            <section className="relative px-6 pb-6 pt-1 sm:px-10 sm:pb-8 lg:py-12 flex items-center">
               <div className="w-full max-w-[360px] mx-auto">
                 <div className="mb-6">
-                  <h2 className="font-display text-2xl font-extrabold text-text tracking-tight">{title}</h2>
+                  <h2 className="font-display text-xl sm:text-2xl font-extrabold text-text tracking-tight">{title}</h2>
                   <p className="text-text-muted text-sm mt-1.5">{subtitle}</p>
                 </div>
 
@@ -241,7 +245,7 @@ export function AuthPage({ initialMode = "login" }: AuthPageProps) {
 
                 {/* ── Sign in / Sign up ─────────────────────────── */}
                 {isAuth && (
-                  <form onSubmit={handleAuth} className="space-y-3.5" noValidate>
+                  <form onSubmit={handleAuth} className="space-y-3 sm:space-y-3.5" noValidate>
                     {screen === "signup" && (
                       <div>
                         <div className="relative">
@@ -338,7 +342,7 @@ export function AuthPage({ initialMode = "login" }: AuthPageProps) {
 
                 {/* ── Forgot password ───────────────────────────── */}
                 {screen === "forgot" && (
-                  <form onSubmit={handleForgot} className="space-y-3.5" noValidate>
+                  <form onSubmit={handleForgot} className="space-y-3 sm:space-y-3.5" noValidate>
                     <div>
                       <div className="relative">
                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-subtle z-10" />
@@ -419,7 +423,7 @@ export function AuthPage({ initialMode = "login" }: AuthPageProps) {
         </div>
 
         {/* Demo hint */}
-        <div className="mt-4 flex items-center justify-center gap-2 text-[11px] text-text-subtle">
+        <div className="mt-3 sm:mt-4 flex items-center justify-center gap-2 text-[11px] text-text-subtle">
           <Sparkles className="w-3.5 h-3.5 text-primary/70" />
           Demo: emails starting with <span className="font-mono text-text-muted">admin</span> get admin access
         </div>
