@@ -108,7 +108,7 @@ export default function ShowDetailPage() {
       {/* Back button */}
       <button
         onClick={() => router.push("/dashboard")}
-        className="flex items-center gap-2 text-text-muted hover:text-text transition-colors mb-6"
+        className="flex items-center gap-2 text-text-muted hover:text-text transition-colors mb-8"
       >
         <ArrowLeft className="w-4 h-4" />
         <span className="text-sm font-medium">Back to Dashboard</span>
@@ -116,7 +116,7 @@ export default function ShowDetailPage() {
 
       <div className="relative">
         {/* Banner (real backdrop, or blurred poster as fallback) */}
-        <div className="relative rounded-3xl overflow-hidden h-48 sm:h-64 bg-bg">
+        <div className="relative rounded-3xl overflow-hidden h-56 sm:h-72 lg:h-80 bg-bg">
           <Artwork
             src={backdrop ?? poster}
             alt=""
@@ -128,7 +128,7 @@ export default function ShowDetailPage() {
         </div>
 
         {/* Poster + info, top-aligned */}
-        <div className="relative -mt-24 sm:-mt-28 grid grid-cols-1 sm:grid-cols-[auto,1fr] gap-6">
+        <div className="relative -mt-24 sm:-mt-28 grid grid-cols-1 sm:grid-cols-[auto,1fr] gap-6 sm:gap-8">
           <div className="mx-auto sm:mx-0 w-36 sm:w-48">
             <div className="relative aspect-[2/3] rounded-2xl overflow-hidden bg-bg border-2 border-surface shadow-xl">
               <Artwork src={poster} alt={show.title} priority sizes="192px" />
@@ -162,9 +162,9 @@ export default function ShowDetailPage() {
         </div>
       </div>
 
-      {/* Your tracking — full width, equal cells */}
-      <div className="mt-6 rounded-2xl bg-surface border border-border p-5">
-        <div className="flex items-center justify-between mb-4">
+      {/* Your tracking — full-width list */}
+      <div className="mt-8 rounded-2xl bg-surface border border-border p-5 sm:p-6">
+        <div className="flex items-center justify-between mb-1">
           <h3 className="font-display font-bold text-text">Your Tracking</h3>
           <div className="flex gap-2">
             <Button variant="secondary" size="sm" onClick={() => openEditModal(userShow)}>
@@ -177,62 +177,64 @@ export default function ShowDetailPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {/* Status */}
-          <div>
-            <span className="text-xs text-text-subtle uppercase tracking-wide block mb-1.5">Status</span>
-            <div className="flex items-center gap-2">
+        <dl className="divide-y divide-border/60">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3.5">
+            <dt className="text-xs font-semibold text-text-subtle uppercase tracking-wide">Status</dt>
+            <dd className="flex items-center gap-2">
               <span className={`w-2.5 h-2.5 rounded-full ${STATUS_DOT_COLORS[userShow.status]}`} />
               <span className="text-sm font-medium text-text">{STATUS_LABELS[userShow.status]}</span>
-            </div>
+            </dd>
           </div>
 
-          {/* Rating */}
-          <div>
-            <span className="text-xs text-text-subtle uppercase tracking-wide block mb-1.5">Your Rating</span>
-            {userShow.rating !== null ? (
-              <div className="flex items-center gap-2 flex-wrap">
-                <RatingStars value={userShow.rating} max={10} size={13} />
-                <span className="text-sm text-text-muted">{userShow.rating}/10</span>
-              </div>
-            ) : (
-              <span className="text-sm text-text-subtle">Not rated</span>
-            )}
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3.5">
+            <dt className="text-xs font-semibold text-text-subtle uppercase tracking-wide">Your Rating</dt>
+            <dd>
+              {userShow.rating !== null ? (
+                <div className="flex items-center gap-2">
+                  <RatingStars value={userShow.rating} max={10} size={14} />
+                  <span className="text-sm text-text-muted">{userShow.rating}/10</span>
+                </div>
+              ) : (
+                <span className="text-sm text-text-subtle">Not rated</span>
+              )}
+            </dd>
           </div>
 
-          {/* Moods */}
-          <div>
-            <span className="text-xs text-text-subtle uppercase tracking-wide block mb-1.5">Moods</span>
-            {userShow.moods.length > 0 ? (
-              <div className="flex flex-wrap gap-1.5">
-                {userShow.moods.map((m) => {
-                  const MoodIcon = MOOD_ICONS[m];
-                  return (
-                    <Badge key={m} className="border-primary/20 bg-primary/5 text-primary">
-                      <MoodIcon className="w-3 h-3" />
-                      {MOOD_LABELS[m]}
-                    </Badge>
-                  );
-                })}
-              </div>
-            ) : (
-              <span className="text-sm text-text-subtle">No moods</span>
-            )}
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3.5">
+            <dt className="text-xs font-semibold text-text-subtle uppercase tracking-wide">Moods</dt>
+            <dd>
+              {userShow.moods.length > 0 ? (
+                <div className="flex flex-wrap justify-end gap-1.5">
+                  {userShow.moods.map((m) => {
+                    const MoodIcon = MOOD_ICONS[m];
+                    return (
+                      <Badge key={m} className="border-primary/20 bg-primary/5 text-primary">
+                        <MoodIcon className="w-3 h-3" />
+                        {MOOD_LABELS[m]}
+                      </Badge>
+                    );
+                  })}
+                </div>
+              ) : (
+                <span className="text-sm text-text-subtle">No moods</span>
+              )}
+            </dd>
           </div>
 
-          {/* Time commitment */}
-          <div>
-            <span className="text-xs text-text-subtle uppercase tracking-wide block mb-1.5">Time Commitment</span>
-            {userShow.time_commit ? (
-              <Badge className="border-border bg-bg/50 text-text-muted">
-                <Clock className="w-3 h-3" />
-                {TIME_COMMIT_LABELS[userShow.time_commit]}
-              </Badge>
-            ) : (
-              <span className="text-sm text-text-subtle">Not set</span>
-            )}
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3.5">
+            <dt className="text-xs font-semibold text-text-subtle uppercase tracking-wide">Time Commitment</dt>
+            <dd>
+              {userShow.time_commit ? (
+                <Badge className="border-border bg-bg/50 text-text-muted">
+                  <Clock className="w-3 h-3" />
+                  {TIME_COMMIT_LABELS[userShow.time_commit]}
+                </Badge>
+              ) : (
+                <span className="text-sm text-text-subtle">Not set</span>
+              )}
+            </dd>
           </div>
-        </div>
+        </dl>
       </div>
     </div>
   );
