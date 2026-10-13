@@ -106,6 +106,7 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
       name: req.body.name,
       email: req.body.email,
       profileImage: req.body.profileImage,
+      avatarColor: req.body.avatarColor,
     });
     return res.status(200).json({ message: "Profile updated", user: updatedUser });
   } catch (error: any) {
@@ -222,5 +223,25 @@ export const updateUserByAdmin = async (req: AuthRequest, res: Response) => {
       return res.status(409).json({ message: "Email already in use" });
     }
     return res.status(500).json({ message: "Error updating user info" });
+  }
+};
+
+/**
+ * @openapi
+ * /api/users/stats:
+ *   get:
+ *     summary: Platform statistics (Admin only)
+ *     tags: [Users]
+ *     responses:
+ *       200: { description: "Aggregated platform stats" }
+ *       403: { description: "Access denied" }
+ */
+export const getPlatformStats = async (req: AuthRequest, res: Response) => {
+  try {
+    if (req.user?.role !== "ADMIN") return res.status(403).json({ message: "Access denied" });
+    const stats = await userService.getPlatformStats();
+    return res.status(200).json({ stats });
+  } catch (error) {
+    return res.status(500).json({ message: "Error fetching platform stats" });
   }
 };

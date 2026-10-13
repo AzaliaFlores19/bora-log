@@ -15,12 +15,20 @@ const generateToken = (id: string, role: string) => {
 
 const hashResetToken = (token: string) => createHash("sha256").update(token).digest("hex");
 
-const toPublicUser = (user: { id: string; name: string; email: string; role: string; profileImage: string | null }) => ({
+const toPublicUser = (user: {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  profileImage: string | null;
+  avatarColor: string | null;
+}) => ({
   id: user.id,
   name: user.name,
   email: user.email,
   role: user.role,
   profileImage: user.profileImage,
+  avatarColor: user.avatarColor,
 });
 
 /**
@@ -48,7 +56,7 @@ const toPublicUser = (user: { id: string; name: string; email: string; role: str
  */
 export const register = async (req: Request, res: Response) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, avatarColor } = req.body;
 
     const existing = await userService.findByEmailIncludingDeleted(email);
 
@@ -64,7 +72,7 @@ export const register = async (req: Request, res: Response) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
-      data: { name, email, password: hashedPassword },
+      data: { name, email, password: hashedPassword, avatarColor },
       select: publicUserSelect,
     });
 

@@ -6,17 +6,12 @@ export const STATUS_VALUES = ["watching", "completed", "plan_to_watch", "dropped
 export const MOOD_VALUES = [
   "happy",
   "sad",
-  "romantic",
-  "chill",
-  "excited",
   "nerdy",
-  "mad",
-  "stressed",
-  "bored",
-  "lonely",
-  "energetic",
-  "tragic",
-  "tense",
+  "adventurous",
+  "romantic",
+  "thrilled",
+  "cozy",
+  "thoughtful",
 ] as const;
 export const TIME_COMMIT_VALUES = ["around_30_min", "between_1_and_3_hours", "binge"] as const;
 export const ROLE_VALUES = ["USER", "ADMIN"] as const;
@@ -26,12 +21,14 @@ export const MEDIA_TYPE_VALUES = ["movie", "tv"] as const;
 const emailField = z.string().trim().email().max(255);
 const passwordField = z.string().min(6).max(72);
 const ratingField = z.number().int().min(1).max(10).nullable();
+const avatarColorField = z.string().trim().regex(/^#[0-9a-fA-F]{6}$/, "Invalid color");
 
 // ===== Auth =====
 export const registerSchema = z.object({
   name: z.string().trim().min(1).max(100),
   email: emailField,
   password: passwordField,
+  avatarColor: avatarColorField.optional(),
 });
 
 export const loginSchema = z.object({
@@ -53,6 +50,7 @@ export const updateProfileSchema = z.object({
   name: z.string().trim().min(1).max(100).optional(),
   email: emailField.optional(),
   profileImage: z.string().trim().url().max(2048).nullable().optional(),
+  avatarColor: avatarColorField.nullable().optional(),
 });
 
 export const updatePasswordSchema = z.object({

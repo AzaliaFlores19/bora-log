@@ -2,6 +2,7 @@ import { Router } from "express";
 import { verifyToken } from "../middleware/authMiddleware.js";
 import {
   searchShows,
+  getTrendingShows,
   addShowToList,
   getUserList,
   updateShowInList,
@@ -22,6 +23,7 @@ import {
 const router = Router();
 
 router.get("/search", searchShows);
+router.get("/trending", getTrendingShows);
 router.post("/add-list", verifyToken, validateBody(addShowSchema), addShowToList);
 router.get("/user-list/:userId", verifyToken, validateQuery(showListQuerySchema), getUserList);
 router.patch("/update-list/:userShowId", verifyToken, validateBody(updateShowEntrySchema), updateShowInList);

@@ -6,6 +6,7 @@ import {
   deleteUser,
   getAllUsers,
   updateUserByAdmin,
+  getPlatformStats,
 } from "../controllers/userController.js";
 import { getAllUserShows } from "../controllers/showController.js";
 import { verifyToken, isAdmin } from "../middleware/authMiddleware.js";
@@ -20,6 +21,7 @@ const router = express.Router();
 
 // User management
 router.get("/me", verifyToken, getUser);
+router.get("/stats", verifyToken, isAdmin, getPlatformStats);
 router.get("/:id", verifyToken, getUser);
 router.patch("/:id", verifyToken, validateBody(updateProfileSchema), updateProfile);
 router.patch("/:id/password", verifyToken, validateBody(updatePasswordSchema), updatePassword);

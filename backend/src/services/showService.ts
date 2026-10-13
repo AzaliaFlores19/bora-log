@@ -20,6 +20,10 @@ export const showService = {
     return await tmdbService.searchMulti(title);
   },
 
+  async getTrending() {
+    return await tmdbService.getTrending();
+  },
+
   async addShow(userId: string, showData: any, userShowData: UserShowData) {
     let fullShowData = { ...showData };
 

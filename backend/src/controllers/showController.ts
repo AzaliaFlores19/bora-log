@@ -33,6 +33,24 @@ export const searchShows = async (req: Request, res: Response) => {
 
 /**
  * @openapi
+ * /api/shows/trending:
+ *   get:
+ *     summary: Trending movies and tv shows on TMDB
+ *     tags: [Shows]
+ *     responses:
+ *       200: { description: "Trending results" }
+ */
+export const getTrendingShows = async (req: Request, res: Response) => {
+  try {
+    const results = await showService.getTrending();
+    return res.status(200).json({ results });
+  } catch (error) {
+    return res.status(500).json({ message: "Error fetching trending shows" });
+  }
+};
+
+/**
+ * @openapi
  * /api/shows/add-list:
  *   post:
  *     summary: Add a show to the user's list (Just-in-Time persistence)

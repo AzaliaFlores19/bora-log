@@ -3,6 +3,17 @@ import axios from "axios";
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
+const isTrackable = (item: any) => item.media_type === "movie" || item.media_type === "tv";
+
+const mapResult = (item: any) => ({
+  external_id: item.id.toString(),
+  title: item.title || item.name,
+  description: item.overview,
+  poster_path: item.poster_path ? `${POSTER_BASE_URL}${item.poster_path}` : null,
+  mediaType: item.media_type,
+  releaseDate: item.release_date || item.first_air_date,
+});
+
 export const searchMulti = async (query: string) => {
   try {
     const response = await axios.get(`${TMDB_BASE_URL}/search/multi`, {
@@ -13,17 +24,23 @@ export const searchMulti = async (query: string) => {
       },
     });
 
-    return response.data.results
-      // search/multi also returns people; the catalog only tracks movies and tv.
-      .filter((item: any) => item.media_type === "movie" || item.media_type === "tv")
-      .map((item: any) => ({
-        external_id: item.id.toString(),
-        title: item.title || item.name,
-        description: item.overview,
-        poster_path: item.poster_path ? `${POSTER_BASE_URL}${item.poster_path}` : null,
-        mediaType: item.media_type,
-        releaseDate: item.release_date || item.first_air_date,
-      }));
+    // search/multi also returns people; the catalog only tracks movies and tv.
+    return response.data.results.filter(isTrackable).map(mapResult);
+  } catch (error) {
+    throw new Error("Error connecting to TMDB");
+  }
+};
+
+export const getTrending = async () => {
+  try {
+    const response = await axios.get(`${TMDB_BASE_URL}/trending/all/week`, {
+      params: {
+        api_key: process.env.TMDB_API_KEY,
+        language: "en-US",
+      },
+    });
+
+    return response.data.results.filter(isTrackable).map(mapResult);
   } catch (error) {
     throw new Error("Error connecting to TMDB");
   }

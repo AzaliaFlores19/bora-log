@@ -7,12 +7,18 @@ export const publicUserSelect = {
   name: true,
   email: true,
   profileImage: true,
+  avatarColor: true,
   role: true,
   isActive: true,
   createdAt: true,
 } as const;
 
-type SelfUpdatable = { name?: string; email?: string; profileImage?: string | null };
+type SelfUpdatable = {
+  name?: string;
+  email?: string;
+  profileImage?: string | null;
+  avatarColor?: string | null;
+};
 type AdminUpdatable = { name?: string; email?: string; role?: "USER" | "ADMIN"; isActive?: boolean };
 
 export const userService = {
@@ -38,6 +44,7 @@ export const userService = {
         name: data.name,
         email: data.email,
         profileImage: data.profileImage,
+        avatarColor: data.avatarColor,
       },
       select: publicUserSelect,
     });
@@ -53,11 +60,44 @@ export const userService = {
   },
 
   async getAllUsers() {
-    return prisma.user.findMany({
+    const users = await prisma.user.findMany({
       where: { deletedAt: null },
-      select: publicUserSelect,
+      select: {
+        ...publicUserSelect,
+        _count: { select: { userShows: { where: { deletedAt: null } } } },
+      },
       orderBy: { createdAt: "desc" },
     });
+    return users.map(({ _count, ...user }) => ({ ...user, show_count: _count.userShows }));
+  },
+
+  /** Aggregated platform stats for the admin dashboard. */
+  async getPlatformStats() {
+    const [totalUsers, totalShows, totalEntries, byStatus] = await Promise.all([
+      prisma.user.count({ where: { deletedAt: null } }),
+      prisma.show.count(),
+      prisma.userShow.count({ where: { deletedAt: null } }),
+      prisma.userShow.groupBy({
+        by: ["status"],
+        where: { deletedAt: null },
+        _count: { _all: true },
+      }),
+    ]);
+
+    const counts: Record<string, number> = { watching: 0, completed: 0, plan_to_watch: 0, dropped: 0 };
+    for (const row of byStatus) {
+      if (row.status) counts[row.status] = row._count._all;
+    }
+
+    return {
+      total_users: totalUsers,
+      total_shows: totalShows,
+      total_entries: totalEntries,
+      watching_count: counts.watching,
+      completed_count: counts.completed,
+      plan_to_watch_count: counts.plan_to_watch,
+      dropped_count: counts.dropped,
+    };
   },
 
   async updateUserByAdmin(id: string, data: AdminUpdatable) {
