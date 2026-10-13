@@ -1,127 +1,72 @@
-import type { AdminUser, PlatformStats, UserShow, PlatformShow } from "@/types";
-import { mockUserShows } from "@/lib/mock-data";
-
-// ===== Admin Service =====
-// Local mock data source for the admin dashboard. Will be replaced by API calls.
-
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-const mockAdminUsers: AdminUser[] = [
-  { id: "u1", email: "alice@example.com", username: "alice", role: "admin", is_active: true, created_at: new Date(Date.now() - 90 * 86400000).toISOString(), show_count: 47 },
-  { id: "u2", email: "bob@example.com", username: "bob_cinema", role: "user", is_active: true, created_at: new Date(Date.now() - 60 * 86400000).toISOString(), show_count: 23 },
-  { id: "u3", email: "carol@example.com", username: "carol_tv", role: "user", is_active: true, created_at: new Date(Date.now() - 45 * 86400000).toISOString(), show_count: 89 },
-  { id: "u4", email: "dave@example.com", username: "dave_watcher", role: "user", is_active: false, created_at: new Date(Date.now() - 30 * 86400000).toISOString(), show_count: 12 },
-  { id: "u5", email: "eve@example.com", username: "eve_binge", role: "user", is_active: true, created_at: new Date(Date.now() - 15 * 86400000).toISOString(), show_count: 156 },
-  { id: "u6", email: "frank@example.com", username: "frank_flix", role: "user", is_active: true, created_at: new Date(Date.now() - 7 * 86400000).toISOString(), show_count: 5 },
-  { id: "u7", email: "grace@example.com", username: "grace_shows", role: "user", is_active: false, created_at: new Date(Date.now() - 3 * 86400000).toISOString(), show_count: 34 },
-];
+import { api } from "@/lib/api";
+import { mapAdminUser, mapUserShow } from "@/lib/mappers";
+import type { AdminUser, PlatformShow, PlatformStats, ShowStatus, UserRole, UserShow } from "@/types";
+import type { PlatformStatsDto, UserDto, UserShowDto } from "@/types/dto";
 
 export async function fetchAllUsers(): Promise<AdminUser[]> {
-  await delay(600);
-  return [...mockAdminUsers];
+  const { data } = await api.get<{ users: UserDto[] }>("/api/users");
+  return data.users.map(mapAdminUser);
 }
 
 export async function fetchPlatformStats(): Promise<PlatformStats> {
-  await delay(500);
-  return {
-    total_users: mockAdminUsers.length,
-    total_shows: 248,
-    total_entries: 366,
-    watching_count: 89,
-    completed_count: 142,
-    plan_to_watch_count: 98,
-    dropped_count: 37,
-  };
+  const { data } = await api.get<{ stats: PlatformStatsDto }>("/api/users/stats");
+  return data.stats;
 }
 
-export async function updateUserRole(userId: string, role: "admin" | "user"): Promise<void> {
-  await delay(400);
-  const user = mockAdminUsers.find((u) => u.id === userId);
-  if (user) user.role = role;
+interface AdminUpdate {
+  name?: string;
+  email?: string;
+  role?: UserRole;
+  isActive?: boolean;
 }
 
-export async function toggleUserActive(userId: string): Promise<boolean> {
-  await delay(400);
-  const user = mockAdminUsers.find((u) => u.id === userId);
-  if (user) {
-    user.is_active = !user.is_active;
-    return user.is_active;
-  }
-  return false;
-}
-
-export async function updateUserProfile(
-  userId: string,
-  updates: { username?: string; email?: string; role?: "admin" | "user" },
-): Promise<void> {
-  await delay(400);
-  const user = mockAdminUsers.find((u) => u.id === userId);
-  if (user) {
-    if (updates.username !== undefined) user.username = updates.username;
-    if (updates.email !== undefined) user.email = updates.email;
-    if (updates.role !== undefined) user.role = updates.role;
-  }
+export async function updateUser(userId: string, updates: AdminUpdate): Promise<AdminUser> {
+  const { data } = await api.patch<{ user: UserDto }>(`/api/users/${userId}/admin-update`, {
+    name: updates.name,
+    email: updates.email,
+    role: updates.role ? updates.role.toUpperCase() : undefined,
+    isActive: updates.isActive,
+  });
+  return mapAdminUser(data.user);
 }
 
 export async function deleteUser(userId: string): Promise<void> {
-  await delay(400);
-  const idx = mockAdminUsers.findIndex((u) => u.id === userId);
-  if (idx !== -1) mockAdminUsers.splice(idx, 1);
+  await api.delete(`/api/users/${userId}`);
+}
+
+/** Permanent delete (admin only). */
+export async function purgeUser(userId: string): Promise<void> {
+  await api.delete(`/api/users/${userId}`, { params: { hard: true } });
 }
 
 export async function fetchUserShowsById(userId: string): Promise<UserShow[]> {
-  await delay(500);
-  const u = mockAdminUsers.find((x) => x.id === userId);
-  if (!u) return [];
-  const count = Math.min(u.show_count, mockUserShows.length * 3);
-  return Array.from({ length: count }, (_, i) => {
-    const base = mockUserShows[i % mockUserShows.length];
-    return {
-      ...base,
-      id: `${userId}-us-${i}`,
-      user_id: userId,
-    } as UserShow;
-  });
+  const { data } = await api.get<{ userShows: UserShowDto[] }>(`/api/shows/user-list/${userId}`);
+  return data.userShows.map(mapUserShow);
 }
 
 export async function fetchAllPlatformShows(): Promise<PlatformShow[]> {
-  await delay(600);
-  // Build a map of show_id -> watchers from all mock user shows
-  const showMap = new Map<string, PlatformShow>();
+  const { data } = await api.get<{ allShows: UserShowDto[] }>("/api/users/shows/all");
 
-  mockUserShows.forEach((us) => {
-    const showId = us.show_id;
-    if (!showMap.has(showId)) {
-      showMap.set(showId, {
-        show: us.show,
-        tracking_count: 0,
-        avg_rating: null,
-        watchers: [],
-      });
+  const byShow = new Map<string, PlatformShow>();
+  for (const dto of data.allShows) {
+    let entry = byShow.get(dto.show_id);
+    if (!entry) {
+      entry = { show: mapUserShow(dto).show, tracking_count: 0, avg_rating: null, watchers: [] };
+      byShow.set(dto.show_id, entry);
     }
-    const entry = showMap.get(showId)!;
-    entry.tracking_count++;
-    if (us.rating !== null) entry.watchers.push({ username: "", status: us.status, rating: us.rating });
-  });
+    entry.tracking_count += 1;
+    entry.watchers.push({
+      username: dto.user?.name ?? "unknown",
+      status: (dto.status ?? "plan_to_watch") as ShowStatus,
+      rating: dto.rating,
+    });
+  }
 
-  // Distribute watchers across mock users for display
-  const result = Array.from(showMap.values());
-  const usernames = mockAdminUsers.map((u) => u.username);
-  result.forEach((ps, idx) => {
-    const ratedWatchers = ps.watchers.filter((w) => w.rating !== null);
-    const avg =
-      ratedWatchers.length > 0
-        ? ratedWatchers.reduce((sum, w) => sum + (w.rating ?? 0), 0) / ratedWatchers.length
-        : null;
-    ps.avg_rating = avg;
-    // Assign random-ish usernames from our mock users
-    ps.watchers = ps.watchers.map((w, i) => ({
-      ...w,
-      username: usernames[(idx + i) % usernames.length],
-    }));
-  });
-
+  const result = Array.from(byShow.values());
+  for (const ps of result) {
+    const rated = ps.watchers.filter((w) => w.rating !== null);
+    ps.avg_rating =
+      rated.length > 0 ? rated.reduce((sum, w) => sum + (w.rating ?? 0), 0) / rated.length : null;
+  }
   return result.sort((a, b) => b.tracking_count - a.tracking_count);
 }

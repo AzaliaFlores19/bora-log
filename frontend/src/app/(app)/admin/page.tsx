@@ -33,7 +33,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { UserWatchLogDrawer } from "@/components/admin/UserWatchLogDrawer";
 import { EditUserModal } from "@/components/admin/EditUserModal";
-import { getPosterUrl } from "@/lib/mock-data";
+import { posterUrl } from "@/lib/media";
 import { STATUS_DOT_COLORS, STATUS_LABELS, STATUS_COLORS } from "@/lib/constants";
 import * as adminService from "@/services/admin.service";
 import type { AdminUser, PlatformStats, PlatformShow, ShowStatus, UserRole } from "@/types";
@@ -133,9 +133,9 @@ export default function AdminPage() {
 
   async function handleToggleActive(u: AdminUser) {
     try {
-      const newActive = await adminService.toggleUserActive(u.id);
-      setUsers((prev) => prev.map((x) => (x.id === u.id ? { ...x, is_active: newActive } : x)));
-      addToast("success", `${u.username} ${newActive ? "activated" : "deactivated"}`);
+      const updated = await adminService.updateUser(u.id, { isActive: !u.is_active });
+      setUsers((prev) => prev.map((x) => (x.id === u.id ? { ...x, is_active: updated.is_active } : x)));
+      addToast("success", `${u.username} ${updated.is_active ? "activated" : "deactivated"}`);
     } catch {
       addToast("error", "Failed to update status");
     }
@@ -144,9 +144,9 @@ export default function AdminPage() {
   async function handleToggleRole(u: AdminUser) {
     const newRole: UserRole = u.role === "admin" ? "user" : "admin";
     try {
-      await adminService.updateUserRole(u.id, newRole);
-      setUsers((prev) => prev.map((x) => (x.id === u.id ? { ...x, role: newRole } : x)));
-      addToast("success", `${u.username} is now ${newRole === "admin" ? "an admin" : "a regular user"}`);
+      const updated = await adminService.updateUser(u.id, { role: newRole });
+      setUsers((prev) => prev.map((x) => (x.id === u.id ? { ...x, role: updated.role } : x)));
+      addToast("success", `${u.username} is now ${updated.role === "admin" ? "an admin" : "a regular user"}`);
     } catch {
       addToast("error", "Failed to update role");
     }
@@ -154,8 +154,12 @@ export default function AdminPage() {
 
   async function handleEditSave(userId: string, updates: { username: string; email: string; role: UserRole }) {
     try {
-      await adminService.updateUserProfile(userId, updates);
-      setUsers((prev) => prev.map((x) => (x.id === userId ? { ...x, ...updates } : x)));
+      const updated = await adminService.updateUser(userId, {
+        name: updates.username,
+        email: updates.email,
+        role: updates.role,
+      });
+      setUsers((prev) => prev.map((x) => (x.id === userId ? updated : x)));
       addToast("success", "User updated successfully");
     } catch {
       addToast("error", "Failed to update user");
@@ -571,7 +575,7 @@ export default function AdminPage() {
                     <div className="w-16 h-24 rounded-lg overflow-hidden bg-bg flex-shrink-0">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={getPosterUrl(ps.show)}
+                        src={posterUrl(ps.show)}
                         alt={ps.show.title}
                         className="w-full h-full object-cover"
                         loading="lazy"

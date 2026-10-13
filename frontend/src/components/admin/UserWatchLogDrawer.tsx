@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { X, Star, Tv, Clock, Clapperboard } from "lucide-react";
 import { MOOD_ICONS } from "@/lib/mood-icons";
 import type { AdminUser, UserShow, ShowStatus } from "@/types";
-import { getPosterUrl } from "@/lib/mock-data";
+import { posterUrl } from "@/lib/media";
 import {
   STATUS_LABELS,
   STATUS_DOT_COLORS,
@@ -127,7 +127,7 @@ export function UserWatchLogDrawer({ user, open, onClose }: UserWatchLogDrawerPr
                     <div className="w-12 h-18 rounded-lg overflow-hidden bg-bg flex-shrink-0">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={getPosterUrl(us.show)}
+                        src={posterUrl(us.show)}
                         alt={us.show.title}
                         className="w-full h-full object-cover"
                         loading="lazy"
