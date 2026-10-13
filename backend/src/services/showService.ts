@@ -16,12 +16,12 @@ type ShowListFilters = {
 };
 
 export const showService = {
-  async searchShows(title: string) {
-    return await tmdbService.searchMulti(title);
+  async searchShows(title: string, mediaType?: string) {
+    return await tmdbService.searchMulti(title, mediaType);
   },
 
-  async getTrending() {
-    return await tmdbService.getTrending();
+  async getTrending(mediaType?: string) {
+    return await tmdbService.getTrending(mediaType);
   },
 
   async addShow(userId: string, showData: any, userShowData: UserShowData) {

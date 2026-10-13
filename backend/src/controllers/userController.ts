@@ -1,4 +1,5 @@
 import { Response } from "express";
+import bcrypt from "bcryptjs";
 import { userService } from "../services/userService.js";
 import { AuthRequest } from "../middleware/authMiddleware.js";
 
@@ -21,19 +22,36 @@ import { AuthRequest } from "../middleware/authMiddleware.js";
  *             type: object
  *             required: [newPassword]
  *             properties:
+ *               currentPassword: { type: string, description: "Required when changing your own password" }
  *               newPassword: { type: string, minLength: 6 }
  *     responses:
  *       200: { description: "Password updated" }
+ *       400: { description: "Current password is incorrect" }
  *       403: { description: "Access denied" }
  *       500: { description: "Internal server error" }
  */
 export const updatePassword = async (req: AuthRequest, res: Response) => {
   try {
-    const targetId = req.params.id || req.user?.id;
+    const targetId = (req.params.id || req.user?.id) as string;
     if (req.user?.role !== "ADMIN" && req.user?.id !== targetId) {
       return res.status(403).json({ message: "Access denied" });
     }
-    await userService.updatePassword(targetId as string, req.body.newPassword);
+
+    // Changing your own password requires the current one; an admin override does not.
+    if (req.user?.id === targetId) {
+      const currentPassword = req.body.currentPassword;
+      if (!currentPassword) {
+        return res.status(400).json({ message: "Current password is required" });
+      }
+      const hash = await userService.findPasswordHash(targetId);
+      if (!hash) return res.status(404).json({ message: "User not found" });
+      const matches = await bcrypt.compare(currentPassword, hash);
+      if (!matches) {
+        return res.status(400).json({ message: "Current password is incorrect" });
+      }
+    }
+
+    await userService.updatePassword(targetId, req.body.newPassword);
     return res.status(200).json({ message: "Password updated successfully" });
   } catch (error) {
     return res.status(500).json({ message: "Error updating password" });

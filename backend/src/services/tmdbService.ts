@@ -5,18 +5,28 @@ const POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
 const isTrackable = (item: any) => item.media_type === "movie" || item.media_type === "tv";
 
-const mapResult = (item: any) => ({
+const mapResult = (item: any, fallbackType?: "movie" | "tv") => ({
   external_id: item.id.toString(),
   title: item.title || item.name,
   description: item.overview,
   poster_path: item.poster_path ? `${POSTER_BASE_URL}${item.poster_path}` : null,
-  mediaType: item.media_type,
+  mediaType: item.media_type ?? fallbackType,
   releaseDate: item.release_date || item.first_air_date,
 });
 
-export const searchMulti = async (query: string) => {
+/**
+ * Search TMDB. `mediaType` defaults to "tv" (the catalog is series-first);
+ * "all" includes movies, "movie" restricts to movies. A "Movies" section can be
+ * enabled later without any new endpoint.
+ */
+export const searchMulti = async (query: string, mediaType: string = "tv") => {
+  const endpoint =
+    mediaType === "movie" ? "search/movie" : mediaType === "all" ? "search/multi" : "search/tv";
+  const fallbackType: "movie" | "tv" | undefined =
+    mediaType === "movie" ? "movie" : mediaType === "all" ? undefined : "tv";
+
   try {
-    const response = await axios.get(`${TMDB_BASE_URL}/search/multi`, {
+    const response = await axios.get(`${TMDB_BASE_URL}/${endpoint}`, {
       params: {
         api_key: process.env.TMDB_API_KEY,
         query: query,
@@ -24,23 +34,34 @@ export const searchMulti = async (query: string) => {
       },
     });
 
-    // search/multi also returns people; the catalog only tracks movies and tv.
-    return response.data.results.filter(isTrackable).map(mapResult);
+    const results: any[] = response.data.results ?? [];
+    const filtered =
+      mediaType === "all" ? results.filter(isTrackable) : results.filter((i) => i.media_type !== "person");
+
+    return filtered.map((item) => mapResult(item, fallbackType));
   } catch (error) {
     throw new Error("Error connecting to TMDB");
   }
 };
 
-export const getTrending = async () => {
+/**
+ * Trending titles. `mediaType` defaults to "tv"; use "movie" or "all" to widen it.
+ */
+export const getTrending = async (mediaType: string = "tv") => {
+  const type = mediaType === "movie" || mediaType === "all" ? mediaType : "tv";
+  const fallbackType: "movie" | "tv" | undefined =
+    type === "movie" ? "movie" : type === "all" ? undefined : "tv";
+
   try {
-    const response = await axios.get(`${TMDB_BASE_URL}/trending/all/week`, {
+    const response = await axios.get(`${TMDB_BASE_URL}/trending/${type}/week`, {
       params: {
         api_key: process.env.TMDB_API_KEY,
         language: "en-US",
       },
     });
 
-    return response.data.results.filter(isTrackable).map(mapResult);
+    const results: any[] = response.data.results ?? [];
+    return results.map((item) => mapResult(item, fallbackType));
   } catch (error) {
     throw new Error("Error connecting to TMDB");
   }

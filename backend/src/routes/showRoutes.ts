@@ -18,12 +18,14 @@ import {
   updateShowEntrySchema,
   showListQuerySchema,
   externalShowParamsSchema,
+  showSearchQuerySchema,
+  mediaTypeFilterSchema,
 } from "../lib/validation.js";
 
 const router = Router();
 
-router.get("/search", searchShows);
-router.get("/trending", getTrendingShows);
+router.get("/search", validateQuery(showSearchQuerySchema), searchShows);
+router.get("/trending", validateQuery(mediaTypeFilterSchema), getTrendingShows);
 router.post("/add-list", verifyToken, validateBody(addShowSchema), addShowToList);
 router.get("/user-list/:userId", verifyToken, validateQuery(showListQuerySchema), getUserList);
 router.patch("/update-list/:userShowId", verifyToken, validateBody(updateShowEntrySchema), updateShowInList);

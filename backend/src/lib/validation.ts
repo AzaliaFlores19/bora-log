@@ -54,6 +54,7 @@ export const updateProfileSchema = z.object({
 });
 
 export const updatePasswordSchema = z.object({
+  currentPassword: z.string().min(1).optional(),
   newPassword: passwordField,
 });
 
@@ -105,6 +106,15 @@ export const showListQuerySchema = z.object({
 export const externalShowParamsSchema = z.object({
   id: z.string().regex(/^\d+$/, "id must be a numeric TMDB id"),
   mediaType: z.enum(MEDIA_TYPE_VALUES),
+});
+
+// Media type filter for catalog browsing (defaults to series).
+export const mediaTypeFilterSchema = z.object({
+  mediaType: z.enum(["tv", "movie", "all"]).optional(),
+});
+
+export const showSearchQuerySchema = mediaTypeFilterSchema.extend({
+  title: z.string().trim().min(1),
 });
 
 export type ShowListQuery = z.infer<typeof showListQuerySchema>;

@@ -20,11 +20,8 @@ import type { ShowListQuery } from "../lib/validation.js";
  */
 export const searchShows = async (req: Request, res: Response) => {
   try {
-    const { title } = req.query;
-    if (!title || typeof title !== "string" || !title.trim()) {
-      return res.status(400).json({ message: "Title is required" });
-    }
-    const results = await showService.searchShows(title.trim());
+    const { title, mediaType } = (res.locals.query ?? {}) as { title: string; mediaType?: string };
+    const results = await showService.searchShows(title, mediaType);
     return res.status(200).json({ results });
   } catch (error) {
     return res.status(500).json({ message: "Error searching shows" });
@@ -42,7 +39,8 @@ export const searchShows = async (req: Request, res: Response) => {
  */
 export const getTrendingShows = async (req: Request, res: Response) => {
   try {
-    const results = await showService.getTrending();
+    const { mediaType } = (res.locals.query ?? {}) as { mediaType?: string };
+    const results = await showService.getTrending(mediaType);
     return res.status(200).json({ results });
   } catch (error) {
     return res.status(500).json({ message: "Error fetching trending shows" });

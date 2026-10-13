@@ -36,6 +36,15 @@ export const userService = {
     return prisma.user.findUnique({ where: { email } });
   },
 
+  /** Password hash only, for verifying the current password. */
+  async findPasswordHash(id: string) {
+    const user = await prisma.user.findFirst({
+      where: { id, deletedAt: null },
+      select: { password: true },
+    });
+    return user?.password ?? null;
+  },
+
   /** Self profile update. Only whitelisted, non-privileged fields. */
   async updateUser(id: string, data: SelfUpdatable) {
     return prisma.user.update({
