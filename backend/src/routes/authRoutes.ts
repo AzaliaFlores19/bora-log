@@ -1,11 +1,18 @@
-import {Router} from "express";
+import { Router } from "express";
 import { register, login, forgotPassword, resetPassword } from "../controllers/authController.js";
+import {
+  validateBody,
+  registerSchema,
+  loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} from "../lib/validation.js";
 
 const router = Router();
 
-router.post("/register", register);
-router.post("/login", login);
-router.post("/forgot-password", forgotPassword);
-router.post("/reset-password", resetPassword);
+router.post("/register", validateBody(registerSchema), register);
+router.post("/login", validateBody(loginSchema), login);
+router.post("/forgot-password", validateBody(forgotPasswordSchema), forgotPassword);
+router.post("/reset-password", validateBody(resetPasswordSchema), resetPassword);
 
 export default router;

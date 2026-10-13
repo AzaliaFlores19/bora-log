@@ -25,8 +25,14 @@ const options = {
     },
     security: [{ bearerAuth: [] }],
   },
-  // Paths to files containing OpenAPI definitions (JSDoc comments)
-  apis: ['./src/routes/*.ts', './src/controllers/*.ts'],
+  // Paths to files containing OpenAPI definitions (JSDoc comments).
+  // Includes the TS sources (dev) and the compiled JS (production).
+  apis: [
+    './src/routes/*.ts',
+    './src/controllers/*.ts',
+    './dist/routes/*.js',
+    './dist/controllers/*.js',
+  ],
 };
 
 export const swaggerSpec = swaggerJsdoc(options);

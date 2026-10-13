@@ -11,7 +11,13 @@ export class PrismaService extends PrismaClient {
     }
     // ... rest
     super({
-      adapter: new PrismaPg({ connectionString }),
+      adapter: new PrismaPg({
+        connectionString,
+        // Force the session timezone to UTC so JS Date values written to
+        // TIMESTAMPTZ columns are interpreted consistently (the DB server may
+        // otherwise run in a local timezone and shift stored instants).
+        options: "-c timezone=UTC",
+      }),
     });
   }
 // ... rest
