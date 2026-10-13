@@ -44,6 +44,7 @@ model Show {
   description   String?
   mediaType     String
   imageUrl      String?
+  backdropUrl   String?
   duration      Int?
   totalEpisodes Int?
   releaseDate   String?
