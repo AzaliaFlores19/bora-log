@@ -72,6 +72,7 @@ export const showDataSchema = z.object({
   description: z.string().nullish(),
   mediaType: z.enum(MEDIA_TYPE_VALUES),
   imageUrl: z.string().trim().url().max(2048).nullish(),
+  backdropUrl: z.string().trim().url().max(2048).nullish(),
   poster_path: z.string().nullish(),
   duration: z.number().int().nonnegative().nullish(),
   totalEpisodes: z.number().int().nonnegative().nullish(),

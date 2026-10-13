@@ -2,6 +2,7 @@ import axios from "axios";
 
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 const POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500";
+const BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/w1280";
 
 const isTrackable = (item: any) => item.media_type === "movie" || item.media_type === "tv";
 
@@ -86,6 +87,7 @@ export const getExternalDetails = async (id: string, mediaType: string) => {
     title: data.title || data.name,
     description: data.overview,
     imageUrl: data.poster_path ? `${POSTER_BASE_URL}${data.poster_path}` : null,
+    backdropUrl: data.backdrop_path ? `${BACKDROP_BASE_URL}${data.backdrop_path}` : null,
     mediaType: mediaType,
 
     duration:

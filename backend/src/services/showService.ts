@@ -37,6 +37,7 @@ export const showService = {
       title: fullShowData.title,
       description: fullShowData.description || "",
       imageUrl: fullShowData.imageUrl || fullShowData.poster_path || null,
+      backdropUrl: fullShowData.backdropUrl || null,
       duration: fullShowData.duration ?? 0,
       totalEpisodes: fullShowData.totalEpisodes ?? 0,
       releaseDate: fullShowData.releaseDate ? new Date(fullShowData.releaseDate).toISOString() : null,
