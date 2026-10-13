@@ -38,6 +38,7 @@ const config: Config = {
         "scale-in": "scaleIn 0.2s ease-out",
         shimmer: "shimmer 1.5s infinite",
         "slide-in-right": "slideInRight 0.3s ease-out",
+        progress: "progress 4s linear forwards",
       },
       keyframes: {
         fadeIn: { "0%": { opacity: "0" }, "100%": { opacity: "1" } },
@@ -56,6 +57,10 @@ const config: Config = {
         slideInRight: {
           "0%": { opacity: "0", transform: "translateX(20px)" },
           "100%": { opacity: "1", transform: "translateX(0)" },
+        },
+        progress: {
+          "0%": { width: "100%" },
+          "100%": { width: "0%" },
         },
       },
     },

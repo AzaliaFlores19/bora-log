@@ -126,6 +126,10 @@
 
 /* ===== Base ===== */
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   * {
     @apply border-border;
   }
@@ -133,6 +137,11 @@
   body {
     @apply bg-bg text-text font-sans antialiased;
     font-feature-settings: "cv11", "ss01";
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--c-primary) / 0.5);
+    outline-offset: 2px;
   }
 
   ::selection {

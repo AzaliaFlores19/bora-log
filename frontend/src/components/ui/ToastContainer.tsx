@@ -28,7 +28,7 @@ export function ToastContainer() {
         return (
           <div
             key={toast.id}
-            className={`flex items-start gap-3 px-4 py-3 rounded-xl bg-surface border ${colorMap[toast.type]} shadow-lg animate-slide-in-right`}
+            className={`relative overflow-hidden flex items-start gap-3 px-4 py-3 rounded-xl bg-surface border border-l-2 ${colorMap[toast.type]} shadow-lg animate-slide-in-right`}
           >
             <Icon className="w-5 h-5 flex-shrink-0 mt-0.5" />
             <p className="flex-1 text-sm text-text">{toast.message}</p>
@@ -38,6 +38,7 @@ export function ToastContainer() {
             >
               <X className="w-4 h-4" />
             </button>
+            <span className="absolute bottom-0 left-0 h-0.5 gradient-primary animate-progress" />
           </div>
         );
       })}
