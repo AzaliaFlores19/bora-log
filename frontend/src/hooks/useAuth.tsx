@@ -13,7 +13,7 @@ interface AuthContextValue {
   signUp: (email: string, password: string, username: string) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (updates: { username?: string; avatar_color?: string | null }) => Promise<void>;
-  changePassword: (newPassword: string) => Promise<void>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -72,9 +72,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const changePassword = useCallback(
-    async (newPassword: string) => {
+    async (currentPassword: string, newPassword: string) => {
       if (!user) return;
-      await userService.changePassword(user.id, newPassword);
+      await userService.changePassword(user.id, newPassword, currentPassword);
     },
     [user],
   );

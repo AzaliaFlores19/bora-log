@@ -16,8 +16,12 @@ export async function updateProfile(
   return mapUser(data.user);
 }
 
-export async function changePassword(id: string, newPassword: string): Promise<void> {
-  await api.patch(`/api/users/${id}/password`, { newPassword });
+export async function changePassword(
+  id: string,
+  newPassword: string,
+  currentPassword?: string,
+): Promise<void> {
+  await api.patch(`/api/users/${id}/password`, { newPassword, currentPassword });
 }
 
 export async function deleteAccount(id: string): Promise<void> {

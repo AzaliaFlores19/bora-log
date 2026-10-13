@@ -25,6 +25,7 @@ export default function SettingsPage() {
   const [savingProfile, setSavingProfile] = useState(false);
 
   // Password state
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [savingPassword, setSavingPassword] = useState(false);
@@ -58,8 +59,9 @@ export default function SettingsPage() {
 
     setSavingPassword(true);
     try {
-      await changePassword(newPassword);
+      await changePassword(currentPassword, newPassword);
       addToast("success", "Password changed successfully");
+      setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (err) {
@@ -176,6 +178,14 @@ export default function SettingsPage() {
             </div>
 
             <form onSubmit={handlePasswordChange} className="space-y-4">
+              <Input
+                label="Current Password"
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Enter current password"
+                required
+              />
               <Input
                 label="New Password"
                 type="password"
